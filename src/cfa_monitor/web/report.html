@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>CFA Match Report</title>
-    <link rel="stylesheet" href="/ui/assets/report.css?v=20260605-player-table-compact" />
+    <link rel="stylesheet" href="/ui/assets/report.css?v=20260605-i18n" />
   </head>
   <body>
     <div class="app-shell" data-app-shell>
       <aside class="desktop-rail" aria-label="比赛导航">
         <div class="rail-brand">
           <span class="brand-mark">CFA</span>
-          <span class="brand-text">Match Center</span>
+          <span class="brand-text" data-brand-text>Match Center</span>
         </div>
         <nav class="rail-tabs" data-desktop-tabs></nav>
         <div class="rail-status">
@@ -25,7 +25,10 @@
           <div class="hero-content">
             <div class="hero-topbar">
               <span class="hero-date" data-match-date>--</span>
-              <span class="hero-state" data-match-status>--</span>
+              <div class="hero-actions">
+                <span class="hero-state" data-match-status>--</span>
+                <div class="lang-switch" data-lang-switch aria-label="Language"></div>
+              </div>
             </div>
 
             <div class="match-title-card">
@@ -58,11 +61,11 @@
 
             <div class="venue-card">
               <div>
-                <span class="field-label">Venue</span>
+                <span class="field-label" data-label-venue>Venue</span>
                 <strong data-venue>--</strong>
               </div>
               <div>
-                <span class="field-label">Goals</span>
+                <span class="field-label" data-label-goals>Goals</span>
                 <strong data-goals-summary>--</strong>
               </div>
             </div>
@@ -78,6 +81,6 @@
       </main>
     </div>
 
-    <script src="/ui/assets/report.js?v=20260605-player-table-compact" type="module"></script>
+    <script src="/ui/assets/report.js?v=20260605-i18n" type="module"></script>
   </body>
 </html>

@@ -1,4 +1,184 @@
 const DEFAULT_FIXTURE_ID = "cq1wnjypozp0xc3b1z3b2hlp0";
+const DEFAULT_LANGUAGE = "cn";
+const LANGUAGES = ["cn", "en", "es"];
+const LANGUAGE_LABELS = { cn: "CN", en: "EN", es: "ES" };
+const HTML_LANG = { cn: "zh-CN", en: "en", es: "es" };
+const TIME_LOCALE = { cn: "zh-CN", en: "en-US", es: "es-ES" };
+
+const TEXT_TRANSLATIONS = {
+  "CFA Match Report": { cn: "CFA 比赛报告", en: "CFA Match Report", es: "Informe de partido CFA" },
+  "Match Center": { cn: "比赛中心", en: "Match Center", es: "Centro de partido" },
+  Language: { cn: "语言", en: "Language", es: "Idioma" },
+  Venue: { cn: "场地", en: "Venue", es: "Sede" },
+  Goals: { cn: "进球", en: "Goals", es: "Goles" },
+  "比赛导航": { en: "Match navigation", es: "Navegación del partido" },
+  "比赛数据标签": { en: "Match data tabs", es: "Pestañas de datos del partido" },
+  "比赛数据分类": { en: "Match data categories", es: "Categorías de datos del partido" },
+  "比赛数据": { en: "Match Data", es: "Datos del partido" },
+  "球队数据": { en: "Team Stats", es: "Datos de equipo" },
+  "球队球员": { en: "Lineups", es: "Alineaciones" },
+  "比赛赛况": { en: "Match Events", es: "Eventos del partido" },
+  "球员进攻": { en: "Player Attack", es: "Ataque de jugadores" },
+  "球员传球": { en: "Player Passing", es: "Pase de jugadores" },
+  "综合数据": { en: "General Stats", es: "Datos generales" },
+  "防守数据": { en: "Defense", es: "Defensa" },
+  "传球矩阵": { en: "Pass Matrix", es: "Matriz de pases" },
+  "体能数据": { en: "Fitness", es: "Datos físicos" },
+  "对比": { en: "Comparison", es: "Comparación" },
+  "暂无球队技术统计。": { en: "No team technical stats.", es: "Sin estadísticas técnicas de equipo." },
+  "暂无比赛事件数据。": { en: "No match event data.", es: "Sin datos de eventos del partido." },
+  "进球、红黄牌、换人": { en: "Goals, cards, substitutions", es: "Goles, tarjetas, cambios" },
+  "首发阵容球场": { en: "Starting XI Pitch", es: "Campo del once inicial" },
+  "按场上位置展示": { en: "Shown by on-field position", es: "Mostrado por posición en cancha" },
+  "首发阵容": { en: "Starting Lineups", es: "Alineaciones titulares" },
+  "替补名单": { en: "Substitutes", es: "Suplentes" },
+  "替补出场与未出场球员": { en: "Used and unused substitutes", es: "Suplentes utilizados y no utilizados" },
+  "教练": { en: "Coaches", es: "Entrenadores" },
+  "暂无球员统计。": { en: "No player stats.", es: "Sin estadísticas de jugadores." },
+  "球员之间成功传球次数": { en: "Successful passes between players", es: "Pases completados entre jugadores" },
+  "暂无传球矩阵数据。": { en: "No pass matrix data.", es: "Sin datos de matriz de pases." },
+  "体能总览": { en: "Fitness Overview", es: "Resumen físico" },
+  "跑动距离、冲刺、进攻与防守跑动": {
+    en: "Distance, sprint, attacking and defensive runs",
+    es: "Distancia, sprints, carreras ofensivas y defensivas",
+  },
+  "球员体能": { en: "Player Fitness", es: "Datos físicos de jugadores" },
+  "按总跑动距离排序": { en: "Sorted by total distance", es: "Ordenado por distancia total" },
+  "这场比赛暂未发现可用体能数据，页面其余数据仍可正常显示。": {
+    en: "No fitness data is available for this match; other data remains visible.",
+    es: "No hay datos físicos disponibles para este partido; el resto de datos sigue visible.",
+  },
+  "暂无该队球员体能明细。": { en: "No player fitness details for this team.", es: "Sin detalles físicos de este equipo." },
+  "体能摘要": { en: "Fitness Summary", es: "Resumen físico" },
+  "暂无核心指标。": { en: "No core metrics.", es: "Sin indicadores principales." },
+  "暂无首发名单。": { en: "No starting lineup.", es: "Sin titulares." },
+  "暂无替补名单。": { en: "No substitute list.", es: "Sin lista de suplentes." },
+  "选择球队": { en: "Select team", es: "Seleccionar equipo" },
+  "未知球员": { en: "Unknown player", es: "Jugador desconocido" },
+  "未知": { en: "Unknown", es: "Desconocido" },
+  "乌龙球": { en: "Own goal", es: "Autogol" },
+  "进球": { en: "Goal", es: "Gol" },
+  "点球": { en: "Penalty", es: "Penalti" },
+  "黄牌": { en: "Yellow card", es: "Tarjeta amarilla" },
+  "红牌": { en: "Red card", es: "Tarjeta roja" },
+  "换下": { en: "for", es: "por" },
+  "换人": { en: "Substitution", es: "Cambio" },
+  "首发": { en: "Starter", es: "Titular" },
+  "替补": { en: "Substitute", es: "Suplente" },
+  "替补未出场": { en: "Unused substitute", es: "Suplente no utilizado" },
+  "上": { en: "on", es: "entra" },
+  "下": { en: "off", es: "sale" },
+  "已完赛": { en: "Finished", es: "Finalizado" },
+  "进行中": { en: "Live", es: "En juego" },
+  "未开始": { en: "Scheduled", es: "Programado" },
+  "加载中": { en: "Loading", es: "Cargando" },
+  "已同步": { en: "Synced", es: "Sincronizado" },
+  "加载失败": { en: "Load failed", es: "Error de carga" },
+  "数据加载失败": { en: "Data load failed", es: "Error al cargar datos" },
+  "等待数据": { en: "Waiting for data", es: "Esperando datos" },
+  "主队": { en: "Home", es: "Local" },
+  "客队": { en: "Away", es: "Visitante" },
+  "常规赛": { en: "Regular Stage", es: "Fase regular" },
+  "友谊赛": { en: "Friendly", es: "Amistoso" },
+  "U16国家队友谊赛": { en: "U16 International Friendly", es: "Amistoso internacional Sub-16" },
+  "CFA国际青年足球锦标赛": {
+    en: "CFA International Youth Football Championship",
+    es: "Campeonato Internacional Juvenil CFA",
+  },
+  "国家北方足球训练基地1号场": {
+    en: "National Northern Football Training Base Field 1",
+    es: "Campo 1, Base Nacional Norte de Entrenamiento de Futbol",
+  },
+  "中国": { en: "China", es: "China" },
+  "中国U16": { en: "China U16", es: "China Sub-16" },
+  "韩国": { en: "Korea Republic", es: "Corea del Sur" },
+  "韩国U16": { en: "Korea Republic U16", es: "Corea del Sur Sub-16" },
+  "塔吉克斯坦U16": { en: "Tajikistan U16", es: "Tayikistán Sub-16" },
+  "乌兹别克斯坦U16": { en: "Uzbekistan U16", es: "Uzbekistán Sub-16" },
+  "号码": { en: "No", es: "N.º" },
+  No: { cn: "号码", en: "No", es: "N.º" },
+  "球员": { en: "Player", es: "Jugador" },
+  Player: { cn: "球员", en: "Player", es: "Jugador" },
+  Pos: { cn: "位置", en: "Pos", es: "Pos" },
+  Min: { cn: "时间", en: "Min", es: "Min" },
+  G: { cn: "进球", en: "G", es: "G" },
+  Sh: { cn: "射门", en: "Sh", es: "Tir" },
+  Pass: { cn: "传球", en: "Pass", es: "Pase" },
+  Tkl: { cn: "抢断", en: "Tkl", es: "Ent" },
+  "总跑动": { en: "Total Distance", es: "Distancia total" },
+  "冲刺": { en: "Sprint", es: "Sprint" },
+  Distance: { cn: "总跑动", en: "Distance", es: "Distancia" },
+  Sprint: { cn: "冲刺", en: "Sprint", es: "Sprint" },
+  "冲刺距离": { en: "Sprint Distance", es: "Distancia de sprint" },
+  "进攻距离": { en: "Attacking Distance", es: "Distancia ofensiva" },
+  "防守距离": { en: "Defensive Distance", es: "Distancia defensiva" },
+  "进球、xG、射门和进攻参与": { en: "Goals, xG, shots and attacking actions", es: "Goles, xG, tiros y acciones ofensivas" },
+  "传球、成功率、传中和预期助攻": { en: "Passing, accuracy, crosses and xA", es: "Pase, precisión, centros y xA" },
+  "出场时间、触球、过人和对抗": { en: "Minutes, touches, dribbles and duels", es: "Minutos, toques, regates y duelos" },
+  "对抗、夺回、解围和抢断": { en: "Duels, recoveries, clearances and tackles", es: "Duelos, recuperaciones, despejes y entradas" },
+  "xG": { en: "xG", es: "xG" },
+  "xA": { en: "xA", es: "xA" },
+  "射门": { en: "Shots", es: "Tiros" },
+  "射正": { en: "Shots on Target", es: "Tiros a puerta" },
+  "进攻动作": { en: "Attacking Actions", es: "Acciones ofensivas" },
+  "传球": { en: "Passes", es: "Pases" },
+  "成功率": { en: "Accuracy", es: "Precisión" },
+  "传中": { en: "Crosses", es: "Centros" },
+  "夺回": { en: "Recoveries", es: "Recuperaciones" },
+  "时间": { en: "Minutes", es: "Minutos" },
+  "触球": { en: "Touches", es: "Toques" },
+  "过人": { en: "Dribbles", es: "Regates" },
+  "对抗": { en: "Duels", es: "Duelos" },
+  "丢失": { en: "Losses", es: "Pérdidas" },
+  "解围": { en: "Clearances", es: "Despejes" },
+  "抢断": { en: "Tackles", es: "Entradas" },
+  "传球者": { en: "Passer", es: "Pasador" },
+  "接球者": { en: "Receiver", es: "Receptor" },
+  "次数": { en: "Count", es: "Veces" },
+  "比分": { en: "Score", es: "Marcador" },
+  "全场总比分": { en: "Final score", es: "Marcador final" },
+  "主队 / 客队": { en: "Home / Away", es: "Local / Visitante" },
+  "传球成功率": { en: "Pass Accuracy", es: "Precisión de pase" },
+  "准确传球 / 总传球": { en: "Accurate / Total passes", es: "Pases precisos / Totales" },
+  "预期进球": { en: "Expected Goals", es: "Goles esperados" },
+  "事件数": { en: "Events", es: "Eventos" },
+  "进球、牌、换人": { en: "Goals, cards, substitutions", es: "Goles, tarjetas, cambios" },
+  "体能总跑动": { en: "Total Team Distance", es: "Distancia total del equipo" },
+  "两队合计": { en: "Both teams", es: "Total de ambos equipos" },
+  "暂无数据": { en: "No data", es: "Sin datos" },
+  "进攻": { en: "Attack", es: "Ataque" },
+  "传控": { en: "Possession & Passing", es: "Posesión y pase" },
+  "常规": { en: "General", es: "General" },
+  "防守&纪律": { en: "Defense & Discipline", es: "Defensa y disciplina" },
+  "控球率": { en: "Possession", es: "Posesión" },
+  "禁区内射门": { en: "Shots Inside Box", es: "Tiros dentro del área" },
+  "禁区外射门": { en: "Shots Outside Box", es: "Tiros fuera del área" },
+  "角球": { en: "Corners", es: "Córners" },
+  "任意球": { en: "Free Kicks", es: "Tiros libres" },
+  "越位": { en: "Offsides", es: "Fueras de juego" },
+  "传球成功": { en: "Accurate Passes", es: "Pases precisos" },
+  "前场传球": { en: "Final Third Passes", es: "Pases en último tercio" },
+  "成功前场传球": { en: "Accurate Final Third Passes", es: "Pases precisos en último tercio" },
+  "传中成功": { en: "Accurate Crosses", es: "Centros precisos" },
+  "尝试过人": { en: "Dribbles Attempted", es: "Regates intentados" },
+  "过人成功": { en: "Successful Dribbles", es: "Regates completados" },
+  "对抗成功": { en: "Duels Won", es: "Duelos ganados" },
+  "对抗失败": { en: "Duels Lost", es: "Duelos perdidos" },
+  "高空球成功": { en: "Aerials Won", es: "Duelos aéreos ganados" },
+  "高空球失败": { en: "Aerials Lost", es: "Duelos aéreos perdidos" },
+  "夺回球权": { en: "Recoveries", es: "Recuperaciones" },
+  "拦截": { en: "Interceptions", es: "Intercepciones" },
+  "封堵": { en: "Blocks", es: "Bloqueos" },
+  "丢失球权": { en: "Possession Lost", es: "Posesión perdida" },
+  "犯规": { en: "Fouls", es: "Faltas" },
+  "被犯规": { en: "Fouls Won", es: "Faltas recibidas" },
+  "Substitute": { cn: "替补", en: "Substitute", es: "Suplente" },
+  Goalkeeper: { cn: "门将", en: "Goalkeeper", es: "Portero" },
+  Defender: { cn: "后卫", en: "Defender", es: "Defensa" },
+  Midfielder: { cn: "中场", en: "Midfielder", es: "Centrocampista" },
+  Striker: { cn: "前锋", en: "Striker", es: "Delantero" },
+  Forward: { cn: "前锋", en: "Forward", es: "Delantero" },
+};
 
 const tabs = [{ id: "match", label: "比赛数据" }];
 
@@ -20,6 +200,10 @@ const state = {
   activeTeam: "home",
   fixtureId: "",
   model: null,
+  lang: initialLanguage(),
+  syncKey: "等待数据",
+  syncReady: false,
+  syncTime: null,
   reloadTimer: 0,
 };
 
@@ -31,6 +215,8 @@ const refs = {
   error: document.querySelector("[data-error]"),
   liveDot: document.querySelector("[data-live-dot]"),
   syncText: document.querySelector("[data-sync-text]"),
+  brandText: document.querySelector("[data-brand-text]"),
+  langSwitch: document.querySelector("[data-lang-switch]"),
   matchDate: document.querySelector("[data-match-date]"),
   matchStatus: document.querySelector("[data-match-status]"),
   competition: document.querySelector("[data-competition]"),
@@ -40,7 +226,9 @@ const refs = {
   homeScore: document.querySelector("[data-home-score]"),
   awayScore: document.querySelector("[data-away-score]"),
   period: document.querySelector("[data-period]"),
+  venueLabel: document.querySelector("[data-label-venue]"),
   venue: document.querySelector("[data-venue]"),
+  goalsLabel: document.querySelector("[data-label-goals]"),
   goalsSummary: document.querySelector("[data-goals-summary]"),
   homeFlag: document.querySelector("[data-home-flag]"),
   awayFlag: document.querySelector("[data-away-flag]"),
@@ -49,6 +237,7 @@ const refs = {
 init();
 
 function init() {
+  renderLanguageSwitch();
   setupTabs();
   setupReportInteractions();
   renderLoading();
@@ -58,7 +247,7 @@ function init() {
 
 function setupTabs() {
   const html = tabs
-    .map((tab) => `<button class="top-tab" type="button" data-tab="${tab.id}">${tab.label}</button>`)
+    .map((tab) => `<button class="top-tab" type="button" data-tab="${tab.id}">${escapeHtml(tx(tab.label))}</button>`)
     .join("");
   refs.mobileTabs.innerHTML = html;
   refs.desktopTabs.innerHTML = html.replaceAll("top-tab", "rail-tab");
@@ -81,6 +270,12 @@ function selectTab(tabId) {
 
 function setupReportInteractions() {
   document.addEventListener("click", (event) => {
+    const language = event.target.closest("[data-lang]");
+    if (language) {
+      setLanguage(language.dataset.lang);
+      return;
+    }
+
     const subTab = event.target.closest("[data-sub-tab]");
     if (subTab) {
       state.activeSubTab = subTab.dataset.subTab || "team";
@@ -96,9 +291,97 @@ function setupReportInteractions() {
   });
 }
 
+function initialLanguage() {
+  const url = new URL(window.location.href);
+  const hashParams = new URLSearchParams((window.location.hash.split("?", 2)[1] || "").trim());
+  return normalizeLanguage(url.searchParams.get("lang") || hashParams.get("lang") || readStoredLanguage() || DEFAULT_LANGUAGE);
+}
+
+function readStoredLanguage() {
+  try {
+    return window.localStorage.getItem("cfa-report-lang");
+  } catch {
+    return "";
+  }
+}
+
+function setStoredLanguage(language) {
+  try {
+    window.localStorage.setItem("cfa-report-lang", language);
+  } catch {
+    // Local storage can be blocked in private browsing; the in-memory language still works.
+  }
+}
+
+function normalizeLanguage(language) {
+  const normalized = String(language || "").trim().toLowerCase();
+  if (["zh", "zh-cn", "cn"].includes(normalized)) {
+    return "cn";
+  }
+  return LANGUAGES.includes(normalized) ? normalized : DEFAULT_LANGUAGE;
+}
+
+function setLanguage(language) {
+  const next = normalizeLanguage(language);
+  if (next === state.lang) {
+    return;
+  }
+  state.lang = next;
+  setStoredLanguage(next);
+  renderLanguageSwitch();
+  setupTabs();
+  if (state.model) {
+    renderHeader(state.model);
+    renderActiveView();
+  } else {
+    renderLoading();
+  }
+}
+
+function renderLanguageSwitch() {
+  document.documentElement.lang = HTML_LANG[state.lang] || HTML_LANG.cn;
+  document.title = tx("CFA Match Report");
+  setText(refs.brandText, tx("Match Center"));
+  setText(refs.venueLabel, tx("Venue"));
+  setText(refs.goalsLabel, tx("Goals"));
+  if (refs.mobileTabs) {
+    refs.mobileTabs.setAttribute("aria-label", tx("比赛数据标签"));
+  }
+  if (refs.desktopTabs) {
+    refs.desktopTabs.setAttribute("aria-label", tx("比赛导航"));
+  }
+  if (refs.langSwitch) {
+    refs.langSwitch.setAttribute("aria-label", tx("Language"));
+    refs.langSwitch.innerHTML = LANGUAGES.map(
+      (language) => `
+        <button class="${language === state.lang ? "active" : ""}" type="button" data-lang="${language}" aria-pressed="${language === state.lang}">
+          ${LANGUAGE_LABELS[language]}
+        </button>
+      `,
+    ).join("");
+  }
+  renderSyncStatus();
+}
+
+function tx(value) {
+  const text = safeText(value);
+  if (text === "--") {
+    return text;
+  }
+  return TEXT_TRANSLATIONS[text]?.[state.lang] || text;
+}
+
+function teamDisplayName(team, preferShort = false) {
+  if (!team) {
+    return "--";
+  }
+  const name = preferShort ? team.shortName || team.name : team.name || team.shortName;
+  return tx(name);
+}
+
 async function loadReport() {
   hideError();
-  setSync("加载中", false);
+  setSyncStatus("加载中", false);
 
   try {
     const sourceConfig = await fetchJson("/api/source-config").catch(() => ({
@@ -145,10 +428,10 @@ async function loadReport() {
     });
 
     renderReport(model);
-    setSync(`已同步 ${formatClock(new Date())}`, true);
+    setSyncStatus("已同步", true, new Date());
   } catch (error) {
-    showError(`数据加载失败：${error.message || error}`);
-    setSync("加载失败", false);
+    showError(`${tx("数据加载失败")}: ${error.message || error}`);
+    setSyncStatus("加载失败", false);
   }
 }
 
@@ -286,14 +569,14 @@ function renderHeader(model) {
 
   setText(refs.matchDate, dateText || "--");
   setText(refs.matchStatus, status);
-  setText(refs.competition, competition);
-  setText(refs.stage, stage);
-  setText(refs.homeName, home.name);
-  setText(refs.awayName, away.name);
+  setText(refs.competition, tx(competition));
+  setText(refs.stage, tx(stage));
+  setText(refs.homeName, teamDisplayName(home));
+  setText(refs.awayName, teamDisplayName(away));
   setText(refs.homeScore, score.home ?? "-");
   setText(refs.awayScore, score.away ?? "-");
-  setText(refs.period, score.period || status);
-  setText(refs.venue, getVenue(matchInfo));
+  setText(refs.period, tx(score.period || status));
+  setText(refs.venue, tx(getVenue(matchInfo)));
   setText(refs.goalsSummary, goalsSummary(goals, home, away));
   renderFlag(refs.homeFlag, home);
   renderFlag(refs.awayFlag, away);
@@ -304,7 +587,7 @@ function renderMatchShell(model) {
     .map(
       (tab) => `
         <button class="sub-tab ${tab.id === state.activeSubTab ? "active" : ""}" type="button" data-sub-tab="${tab.id}">
-          ${escapeHtml(tab.label)}
+          ${escapeHtml(tx(tab.label))}
         </button>
       `,
     )
@@ -313,8 +596,8 @@ function renderMatchShell(model) {
   return `
     <section class="view active subview-${escapeHtml(state.activeSubTab)}" data-view="match">
       <div class="sub-tabs-wrap">
-        <h2>比赛数据</h2>
-        <div class="sub-tabs" aria-label="比赛数据分类">${subTabs}</div>
+        <h2>${escapeHtml(tx("比赛数据"))}</h2>
+        <div class="sub-tabs" aria-label="${escapeHtml(tx("比赛数据分类"))}">${subTabs}</div>
         <div class="sub-scrollbar" aria-hidden="true"></div>
       </div>
       <div class="section-pad">${renderMatchSubView(model)}</div>
@@ -340,14 +623,14 @@ function renderMatchSubView(model) {
 function renderTeamStatsView(model) {
   const groups = model.metricGroups.length
     ? model.metricGroups.map(renderMetricGroup).join("")
-    : `<div class="empty-state">暂无球队技术统计。</div>`;
+    : `<div class="empty-state">${escapeHtml(tx("暂无球队技术统计。"))}</div>`;
 
   return `
     <section class="panel">
       <div class="metric-compare-head">
-        <span class="team-head home"><i></i>${escapeHtml(model.home.name)}</span>
-        <strong>对比</strong>
-        <span class="team-head away">${escapeHtml(model.away.name)}<i></i></span>
+        <span class="team-head home"><i></i>${escapeHtml(teamDisplayName(model.home))}</span>
+        <strong>${escapeHtml(tx("对比"))}</strong>
+        <span class="team-head away">${escapeHtml(teamDisplayName(model.away))}<i></i></span>
       </div>
       <div class="panel-body metric-panel-body">${groups}</div>
     </section>
@@ -357,7 +640,7 @@ function renderTeamStatsView(model) {
 function renderMetricGroup(group) {
   return `
     <div class="metric-group">
-      <h3 class="metric-group-title">${escapeHtml(group.title)}</h3>
+      <h3 class="metric-group-title">${escapeHtml(tx(group.title))}</h3>
       <div class="metric-list">${group.rows.map(renderCompareMetricRow).join("")}</div>
     </div>
   `;
@@ -374,7 +657,7 @@ function renderCompareMetricRow(metric) {
     <div class="metric-row compare-row">
       <div class="metric-value home-value ${homeBetter ? "is-better" : ""}">${escapeHtml(metric.home.label)}</div>
       <div class="bar-track home-track"><span class="bar-home" style="width:${clamp(homeWidth, 0, 100)}%"></span></div>
-      <div class="metric-name">${escapeHtml(metric.label)}</div>
+      <div class="metric-name">${escapeHtml(tx(metric.label))}</div>
       <div class="bar-track away-track"><span class="bar-away" style="width:${clamp(awayWidth, 0, 100)}%"></span></div>
       <div class="metric-value away-value ${awayBetter ? "is-better" : ""}">${escapeHtml(metric.away.label)}</div>
     </div>
@@ -384,14 +667,14 @@ function renderCompareMetricRow(metric) {
 function renderEventsView(model) {
   const body = model.events.length
     ? `<div class="timeline">${model.events.map((event) => renderEvent(event, model)).join("")}</div>`
-    : `<div class="empty-state">暂无比赛事件数据。</div>`;
+    : `<div class="empty-state">${escapeHtml(tx("暂无比赛事件数据。"))}</div>`;
 
   return `
     <section class="panel">
       <div class="panel-head">
         <div>
-          <h2 class="panel-title">比赛赛况</h2>
-          <p class="panel-subtitle">进球、红黄牌、换人</p>
+          <h2 class="panel-title">${escapeHtml(tx("比赛赛况"))}</h2>
+          <p class="panel-subtitle">${escapeHtml(tx("进球、红黄牌、换人"))}</p>
         </div>
       </div>
       <div class="panel-body">${body}</div>
@@ -405,8 +688,8 @@ function renderLineupsView(model) {
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">首发阵容球场</h2>
-            <p class="panel-subtitle">按场上位置展示</p>
+            <h2 class="panel-title">${escapeHtml(tx("首发阵容球场"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(tx("按场上位置展示"))}</p>
           </div>
         </div>
         <div class="panel-body">
@@ -417,8 +700,8 @@ function renderLineupsView(model) {
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">首发阵容</h2>
-            <p class="panel-subtitle">${escapeHtml(model.home.name)} / ${escapeHtml(model.away.name)}</p>
+            <h2 class="panel-title">${escapeHtml(tx("首发阵容"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(teamDisplayName(model.home))} / ${escapeHtml(teamDisplayName(model.away))}</p>
           </div>
         </div>
         <div class="panel-body">
@@ -429,8 +712,8 @@ function renderLineupsView(model) {
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">替补名单</h2>
-            <p class="panel-subtitle">替补出场与未出场球员</p>
+            <h2 class="panel-title">${escapeHtml(tx("替补名单"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(tx("替补出场与未出场球员"))}</p>
           </div>
         </div>
         <div class="panel-body">
@@ -441,8 +724,8 @@ function renderLineupsView(model) {
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">教练</h2>
-            <p class="panel-subtitle">${escapeHtml(model.home.name)} / ${escapeHtml(model.away.name)}</p>
+            <h2 class="panel-title">${escapeHtml(tx("教练"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(teamDisplayName(model.home))} / ${escapeHtml(teamDisplayName(model.away))}</p>
           </div>
         </div>
         <div class="panel-body">
@@ -466,7 +749,7 @@ function renderPlayerStatsView(model, type) {
         ${renderTeamSwitch(model)}
       </div>
       <div class="panel-body">
-        ${rows.length ? renderPlayerStatsTable(rows, config.columns) : `<div class="empty-state">暂无球员统计。</div>`}
+        ${rows.length ? renderPlayerStatsTable(rows, config.columns) : `<div class="empty-state">${escapeHtml(tx("暂无球员统计。"))}</div>`}
         ${type === "general" ? renderFitnessInline(model) : ""}
       </div>
     </section>
@@ -512,8 +795,8 @@ function renderMatrixView(model) {
     <section class="panel player-panel">
       <div class="panel-head player-panel-head">
         <div>
-          <h2 class="panel-title">传球矩阵</h2>
-          <p class="panel-subtitle">球员之间成功传球次数</p>
+          <h2 class="panel-title">${escapeHtml(tx("传球矩阵"))}</h2>
+          <p class="panel-subtitle">${escapeHtml(tx("球员之间成功传球次数"))}</p>
         </div>
         ${renderTeamSwitch(model)}
       </div>
@@ -530,12 +813,12 @@ function renderMatrixView(model) {
               </div>
               <div class="table-wrap matrix-links">
                 <table class="data-table compact-table">
-                  <thead><tr><th>传球者</th><th>接球者</th><th class="num">次数</th></tr></thead>
+                  <thead><tr><th>${escapeHtml(tx("传球者"))}</th><th>${escapeHtml(tx("接球者"))}</th><th class="num">${escapeHtml(tx("次数"))}</th></tr></thead>
                   <tbody>${linkRows}</tbody>
                 </table>
               </div>
             `
-            : `<div class="empty-state">暂无传球矩阵数据。</div>`
+            : `<div class="empty-state">${escapeHtml(tx("暂无传球矩阵数据。"))}</div>`
         }
       </div>
     </section>
@@ -546,20 +829,20 @@ function renderFitnessView(model) {
   const hasFitness = model.fitness.available;
   const teamBody = hasFitness
     ? `<div class="fitness-grid">${model.fitness.teams.map(renderFitnessCard).join("")}</div>`
-    : `<div class="empty-state">这场比赛暂未发现可用体能数据，页面其余数据仍可正常显示。</div>`;
+    : `<div class="empty-state">${escapeHtml(tx("这场比赛暂未发现可用体能数据，页面其余数据仍可正常显示。"))}</div>`;
 
   const fitnessPlayers = fitnessPlayersForSide(model, state.activeTeam);
   const playerBody = fitnessPlayers.length
     ? renderFitnessPlayerTable(fitnessPlayers)
-    : `<div class="empty-state">暂无该队球员体能明细。</div>`;
+    : `<div class="empty-state">${escapeHtml(tx("暂无该队球员体能明细。"))}</div>`;
 
   return `
     <div class="lineups-flow">
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2 class="panel-title">体能总览</h2>
-            <p class="panel-subtitle">跑动距离、冲刺、进攻与防守跑动</p>
+            <h2 class="panel-title">${escapeHtml(tx("体能总览"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(tx("跑动距离、冲刺、进攻与防守跑动"))}</p>
           </div>
         </div>
         <div class="panel-body">${teamBody}</div>
@@ -568,8 +851,8 @@ function renderFitnessView(model) {
       <section class="panel player-panel">
         <div class="panel-head player-panel-head">
           <div>
-            <h2 class="panel-title">球员体能</h2>
-            <p class="panel-subtitle">按总跑动距离排序</p>
+            <h2 class="panel-title">${escapeHtml(tx("球员体能"))}</h2>
+            <p class="panel-subtitle">${escapeHtml(tx("按总跑动距离排序"))}</p>
           </div>
           ${renderTeamSwitch(model)}
         </div>
@@ -599,16 +882,16 @@ function renderLoading() {
 function renderStatTile(item) {
   return `
     <div class="stat-tile">
-      <span>${escapeHtml(item.label)}</span>
+      <span>${escapeHtml(tx(item.label))}</span>
       <strong>${escapeHtml(item.value)}</strong>
-      <small>${escapeHtml(item.detail || "")}</small>
+      <small>${escapeHtml(tx(item.detail || ""))}</small>
     </div>
   `;
 }
 
 function renderMetricList(metrics) {
   if (!metrics.length) {
-    return `<div class="empty-state">暂无核心指标。</div>`;
+    return `<div class="empty-state">${escapeHtml(tx("暂无核心指标。"))}</div>`;
   }
   return `<div class="metric-list">${metrics.map(renderMetricRow).join("")}</div>`;
 }
@@ -622,7 +905,7 @@ function renderMetricRow(metric) {
     <div class="metric-row">
       <div class="metric-top">
         <span class="metric-value home">${escapeHtml(metric.home.label)}</span>
-        <span class="metric-name">${escapeHtml(metric.label)}</span>
+        <span class="metric-name">${escapeHtml(tx(metric.label))}</span>
         <span class="metric-value away">${escapeHtml(metric.away.label)}</span>
       </div>
       <div class="metric-bars">
@@ -636,9 +919,9 @@ function renderMetricRow(metric) {
 function renderTeamMini(team, lineup, side) {
   return `
     <div class="team-mini ${side}">
-      <strong>${escapeHtml(team.name)}</strong>
-      <span>首发 ${lineup.starters.length || "-"} / 替补 ${lineup.substitutes.length || "-"}</span>
-      <span>球队 ID ${escapeHtml(team.id || "--")}</span>
+      <strong>${escapeHtml(teamDisplayName(team))}</strong>
+      <span>${escapeHtml(tx("首发"))} ${lineup.starters.length || "-"} / ${escapeHtml(tx("替补"))} ${lineup.substitutes.length || "-"}</span>
+      <span>Team ID ${escapeHtml(team.id || "--")}</span>
     </div>
   `;
 }
@@ -649,7 +932,7 @@ function renderEvent(event, model) {
       <span class="event-minute">${escapeHtml(event.minuteLabel)}</span>
       <div class="event-card">
         <strong class="event-title">${renderEventTitle(event, model)}</strong>
-        <span>${escapeHtml(event.subtitle)}</span>
+        <span>${escapeHtml(eventSubtitle(event, model))}</span>
       </div>
     </div>
   `;
@@ -657,7 +940,7 @@ function renderEvent(event, model) {
 
 function renderEventTitle(event, model) {
   if (!event.titleParts?.length) {
-    return escapeHtml(event.title || "--");
+    return escapeHtml(tx(event.title || "--"));
   }
   return event.titleParts.map((part) => renderEventTitlePart(part, model)).join("");
 }
@@ -666,11 +949,17 @@ function renderEventTitlePart(part, model) {
   if (part.kind === "player") {
     const team = teamBySide(part.side, model);
     return `
-      <span class="event-player-name">${escapeHtml(part.name || "未知球员")}</span>
+      <span class="event-player-name">${escapeHtml(part.name || tx("未知球员"))}</span>
       ${renderInlineFlag(team)}
     `;
   }
-  return `<span class="event-action-text">${escapeHtml(part.text || "")}</span>`;
+  return `<span class="event-action-text">${escapeHtml(tx(part.text || ""))}</span>`;
+}
+
+function eventSubtitle(event, model) {
+  const team = teamBySide(event.side, model);
+  const teamName = team ? teamDisplayName(team) : tx(event.subtitle || "--");
+  return `${teamName}${event.penalty ? ` / ${tx("点球")}` : ""}`;
 }
 
 function renderPitch(model) {
@@ -680,10 +969,10 @@ function renderPitch(model) {
   return `
     <div class="pitch-layout">
       <div class="pitch-meta">
-        <span class="side-chip away">${escapeHtml(model.away.name)} ${escapeHtml(model.lineups.away.formation || "--")}</span>
-        <span class="side-chip home">${escapeHtml(model.home.name)} ${escapeHtml(model.lineups.home.formation || "--")}</span>
+        <span class="side-chip away">${escapeHtml(teamDisplayName(model.away))} ${escapeHtml(model.lineups.away.formation || "--")}</span>
+        <span class="side-chip home">${escapeHtml(teamDisplayName(model.home))} ${escapeHtml(model.lineups.home.formation || "--")}</span>
       </div>
-      <div class="football-pitch" aria-label="首发阵容球场">
+      <div class="football-pitch" aria-label="${escapeHtml(tx("首发阵容球场"))}">
         <div class="pitch-stripes"></div>
         <div class="pitch-border"></div>
         <div class="pitch-line center"></div>
@@ -692,8 +981,8 @@ function renderPitch(model) {
         <div class="pitch-box top goal"></div>
         <div class="pitch-box bottom penalty"></div>
         <div class="pitch-box bottom goal"></div>
-        <span class="pitch-team-label away">${escapeHtml(model.away.name)}</span>
-        <span class="pitch-team-label home">${escapeHtml(model.home.name)}</span>
+        <span class="pitch-team-label away">${escapeHtml(teamDisplayName(model.away))}</span>
+        <span class="pitch-team-label home">${escapeHtml(teamDisplayName(model.home))}</span>
         ${awaySlots.map((slot) => renderPitchPlayer(slot, "away")).join("")}
         ${homeSlots.map((slot) => renderPitchPlayer(slot, "home")).join("")}
       </div>
@@ -716,7 +1005,7 @@ function renderLineupPairTable(model, type) {
   const awayRows = model.lineups.away[type];
   const maxRows = Math.max(homeRows.length, awayRows.length);
   if (!maxRows) {
-    return `<div class="empty-state">${type === "starters" ? "暂无首发名单。" : "暂无替补名单。"}</div>`;
+    return `<div class="empty-state">${escapeHtml(tx(type === "starters" ? "暂无首发名单。" : "暂无替补名单。"))}</div>`;
   }
 
   const rows = Array.from({ length: maxRows }, (_, index) => {
@@ -735,8 +1024,8 @@ function renderLineupPairTable(model, type) {
       <table class="data-table lineup-pair-table">
         <thead>
           <tr>
-            <th colspan="2">${escapeHtml(model.home.name)}</th>
-            <th colspan="2">${escapeHtml(model.away.name)}</th>
+            <th colspan="2">${escapeHtml(teamDisplayName(model.home))}</th>
+            <th colspan="2">${escapeHtml(teamDisplayName(model.away))}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -764,7 +1053,31 @@ function renderLineupTableCell(player, side) {
 }
 
 function lineupPlayerMeta(player) {
-  return [player.positionCode || player.position, player.status].filter(Boolean).join(" / ") || "--";
+  return [translatePosition(player.positionCode || player.position), translateLineupStatus(player.status)].filter(Boolean).join(" / ") || "--";
+}
+
+function translatePosition(position) {
+  const text = safeText(position);
+  if (text === "--") {
+    return text;
+  }
+  return tx(text);
+}
+
+function translateLineupStatus(status) {
+  const text = safeText(status);
+  if (text === "--") {
+    return text;
+  }
+  if (state.lang === "cn") {
+    return text;
+  }
+  return text
+    .replaceAll("替补未出场", tx("替补未出场"))
+    .replaceAll("首发", tx("首发"))
+    .replaceAll("替补", tx("替补"))
+    .replaceAll("下", tx("下"))
+    .replaceAll("上", tx("上"));
 }
 
 function renderCoachTable(model) {
@@ -773,11 +1086,11 @@ function renderCoachTable(model) {
       <table class="data-table lineup-pair-table compact-table">
         <tbody>
           <tr>
-            <td class="lineup-player-cell"><strong>${escapeHtml(model.home.name)}</strong></td>
+            <td class="lineup-player-cell"><strong>${escapeHtml(teamDisplayName(model.home))}</strong></td>
             <td>${escapeHtml(model.coaches.home || "-")}</td>
           </tr>
           <tr>
-            <td class="lineup-player-cell"><strong>${escapeHtml(model.away.name)}</strong></td>
+            <td class="lineup-player-cell"><strong>${escapeHtml(teamDisplayName(model.away))}</strong></td>
             <td>${escapeHtml(model.coaches.away || "-")}</td>
           </tr>
         </tbody>
@@ -788,12 +1101,12 @@ function renderCoachTable(model) {
 
 function renderTeamSwitch(model) {
   return `
-    <div class="team-switch" role="group" aria-label="选择球队">
+    <div class="team-switch" role="group" aria-label="${escapeHtml(tx("选择球队"))}">
       <button class="${state.activeTeam === "home" ? "active" : ""}" type="button" data-team-filter="home">
-        ${escapeHtml(model.home.shortName || model.home.name)}
+        ${escapeHtml(teamDisplayName(model.home, true))}
       </button>
       <button class="${state.activeTeam === "away" ? "active" : ""}" type="button" data-team-filter="away">
-        ${escapeHtml(model.away.shortName || model.away.name)}
+        ${escapeHtml(teamDisplayName(model.away, true))}
       </button>
     </div>
   `;
@@ -802,55 +1115,55 @@ function renderTeamSwitch(model) {
 function playerTableConfig(type) {
   const configs = {
     attack: {
-      title: "球员进攻",
-      subtitle: "进球、xG、射门和进攻参与",
+      title: tx("球员进攻"),
+      subtitle: tx("进球、xG、射门和进攻参与"),
       columns: [
-        ["no", "号码", "no"],
-        ["player", "球员", ""],
-        ["goals", "进球", "num"],
-        ["xg", "xG", "num"],
-        ["shots", "射门", "num"],
-        ["shotsOn", "射正", "num"],
-        ["actions", "进攻动作", "num"],
+        ["no", tx("号码"), "no"],
+        ["player", tx("球员"), ""],
+        ["goals", tx("进球"), "num"],
+        ["xg", tx("xG"), "num"],
+        ["shots", tx("射门"), "num"],
+        ["shotsOn", tx("射正"), "num"],
+        ["actions", tx("进攻动作"), "num"],
       ],
     },
     passing: {
-      title: "球员传球",
-      subtitle: "传球、成功率、传中和预期助攻",
+      title: tx("球员传球"),
+      subtitle: tx("传球、成功率、传中和预期助攻"),
       columns: [
-        ["no", "号码", "no"],
-        ["player", "球员", ""],
-        ["xa", "xA", "num"],
-        ["passes", "传球", "num"],
-        ["accuracy", "成功率", "num"],
-        ["crosses", "传中", "num"],
-        ["recoveries", "夺回", "num"],
+        ["no", tx("号码"), "no"],
+        ["player", tx("球员"), ""],
+        ["xa", tx("xA"), "num"],
+        ["passes", tx("传球"), "num"],
+        ["accuracy", tx("成功率"), "num"],
+        ["crosses", tx("传中"), "num"],
+        ["recoveries", tx("夺回"), "num"],
       ],
     },
     general: {
-      title: "综合数据",
-      subtitle: "出场时间、触球、过人和对抗",
+      title: tx("综合数据"),
+      subtitle: tx("出场时间、触球、过人和对抗"),
       columns: [
-        ["no", "号码", "no"],
-        ["player", "球员", ""],
-        ["minutes", "时间", "num"],
-        ["touches", "触球", "num"],
-        ["dribbles", "过人", "num"],
-        ["duels", "对抗", "num"],
-        ["losses", "丢失", "num"],
+        ["no", tx("号码"), "no"],
+        ["player", tx("球员"), ""],
+        ["minutes", tx("时间"), "num"],
+        ["touches", tx("触球"), "num"],
+        ["dribbles", tx("过人"), "num"],
+        ["duels", tx("对抗"), "num"],
+        ["losses", tx("丢失"), "num"],
       ],
     },
     defense: {
-      title: "防守数据",
-      subtitle: "对抗、夺回、解围和抢断",
+      title: tx("防守数据"),
+      subtitle: tx("对抗、夺回、解围和抢断"),
       columns: [
-        ["no", "号码", "no"],
-        ["player", "球员", ""],
-        ["duels", "对抗", "num"],
-        ["recoveries", "夺回", "num"],
-        ["clearances", "解围", "num"],
-        ["tackles", "抢断", "num"],
-        ["losses", "丢失", "num"],
+        ["no", tx("号码"), "no"],
+        ["player", tx("球员"), ""],
+        ["duels", tx("对抗"), "num"],
+        ["recoveries", tx("夺回"), "num"],
+        ["clearances", tx("解围"), "num"],
+        ["tackles", tx("抢断"), "num"],
+        ["losses", tx("丢失"), "num"],
       ],
     },
   };
@@ -888,7 +1201,7 @@ function renderPlayerStatsCell(row, key, className) {
       <td>
         <span class="player-name">
           <strong>${escapeHtml(row.player)}</strong>
-          <span>${escapeHtml(row.position || "--")}</span>
+          <span>${escapeHtml(translatePosition(row.position || "--"))}</span>
         </span>
       </td>
     `;
@@ -918,11 +1231,11 @@ function renderFitnessInline(model) {
 
   return `
     <div class="inline-section">
-      <h3 class="panel-title">体能摘要</h3>
+      <h3 class="panel-title">${escapeHtml(tx("体能摘要"))}</h3>
       ${
         rows
-          ? `<div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>号码</th><th>球员</th><th class="num">总跑动</th><th class="num">冲刺</th></tr></thead><tbody>${rows}</tbody></table></div>`
-          : `<div class="empty-state">暂无该队球员体能明细。</div>`
+          ? `<div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>${escapeHtml(tx("号码"))}</th><th>${escapeHtml(tx("球员"))}</th><th class="num">${escapeHtml(tx("总跑动"))}</th><th class="num">${escapeHtml(tx("冲刺"))}</th></tr></thead><tbody>${rows}</tbody></table></div>`
+          : `<div class="empty-state">${escapeHtml(tx("暂无该队球员体能明细。"))}</div>`
       }
     </div>
   `;
@@ -1042,10 +1355,10 @@ function renderPlayerTable(players) {
           <td>
             <span class="player-name">
               <strong>${escapeHtml(player.name)}</strong>
-              <span>${escapeHtml(player.teamName)}${player.shirt ? ` #${escapeHtml(player.shirt)}` : ""}</span>
+              <span>${escapeHtml(tx(player.teamName))}${player.shirt ? ` #${escapeHtml(player.shirt)}` : ""}</span>
             </span>
           </td>
-          <td>${escapeHtml(player.position || "--")}</td>
+          <td>${escapeHtml(translatePosition(player.position || "--"))}</td>
           <td class="num">${formatMetricValue(player.stats.minutes, "")}</td>
           <td class="num">${formatMetricValue(player.stats.goals, "")}</td>
           <td class="num">${formatMetricValue(player.stats.shots, "")}</td>
@@ -1061,13 +1374,13 @@ function renderPlayerTable(players) {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Player</th>
-            <th>Pos</th>
-            <th class="num">Min</th>
-            <th class="num">G</th>
-            <th class="num">Sh</th>
-            <th class="num">Pass</th>
-            <th class="num">Tkl</th>
+            <th>${escapeHtml(tx("Player"))}</th>
+            <th>${escapeHtml(tx("Pos"))}</th>
+            <th class="num">${escapeHtml(tx("Min"))}</th>
+            <th class="num">${escapeHtml(tx("G"))}</th>
+            <th class="num">${escapeHtml(tx("Sh"))}</th>
+            <th class="num">${escapeHtml(tx("Pass"))}</th>
+            <th class="num">${escapeHtml(tx("Tkl"))}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1078,15 +1391,15 @@ function renderPlayerTable(players) {
 
 function renderFitnessCard(team) {
   const metrics = [
-    ["总跑动", formatDistance(team.totalDistance)],
-    ["冲刺距离", formatDistance(team.sprintDistance)],
-    ["进攻距离", formatDistance(team.offensiveDistance)],
-    ["防守距离", formatDistance(team.defensiveDistance)],
+    [tx("总跑动"), formatDistance(team.totalDistance)],
+    [tx("冲刺距离"), formatDistance(team.sprintDistance)],
+    [tx("进攻距离"), formatDistance(team.offensiveDistance)],
+    [tx("防守距离"), formatDistance(team.defensiveDistance)],
   ];
 
   return `
     <div class="fitness-card ${team.side}">
-      <h3>${escapeHtml(team.name)}</h3>
+      <h3>${escapeHtml(teamDisplayName(team))}</h3>
       <div class="fitness-metrics">
         ${metrics
           .map(
@@ -1114,7 +1427,7 @@ function renderFitnessPlayerTable(players) {
           <td>
             <span class="player-name">
               <strong>${escapeHtml(player.name)}</strong>
-              <span>${escapeHtml(player.teamName || "--")}</span>
+              <span>${escapeHtml(tx(player.teamName || "--"))}</span>
             </span>
           </td>
           <td class="num">${escapeHtml(player.shirt || "--")}</td>
@@ -1130,10 +1443,10 @@ function renderFitnessPlayerTable(players) {
       <table class="data-table">
         <thead>
           <tr>
-            <th>Player</th>
-            <th class="num">No</th>
-            <th class="num">Distance</th>
-            <th class="num">Sprint</th>
+            <th>${escapeHtml(tx("Player"))}</th>
+            <th class="num">${escapeHtml(tx("No"))}</th>
+            <th class="num">${escapeHtml(tx("Distance"))}</th>
+            <th class="num">${escapeHtml(tx("Sprint"))}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1392,6 +1705,7 @@ function normalizeEvents(liveData, goals, home, away) {
     minuteLabel: formatMinute(goal.minute),
     title: `${goal.player || "未知球员"} ${goal.ownGoal ? "乌龙球" : "进球"}`,
     side: goal.side,
+    penalty: goal.penalty,
     titleParts: [
       { kind: "player", name: goal.player || "未知球员", side: goal.side },
       { kind: "text", text: goal.ownGoal ? "乌龙球" : "进球" },
@@ -1417,7 +1731,7 @@ function normalizeEvents(liveData, goals, home, away) {
 
   const subs = arrayOf(liveData?.substitute || liveData?.substitutes || liveData?.substitution).map((sub) => {
     const side = sideForTeam(sub.contestantId || sub.teamId || sub.contestantName || sub.teamName, home, away);
-    const on = sub.playerOnName || sub.playerOn || sub.playerName || sub.subOn || "换上";
+    const on = sub.playerOnName || sub.playerOn || sub.playerName || sub.subOn || "未知球员";
     const off = sub.playerOffName || sub.playerOff || sub.subOff || "";
     return {
       minute: minuteOf(sub),
@@ -2084,7 +2398,7 @@ function formatDateTime(date, time) {
 }
 
 function formatClock(date) {
-  return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return date.toLocaleTimeString(TIME_LOCALE[state.lang] || TIME_LOCALE.cn, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 function translateStatus(status) {
@@ -2093,15 +2407,15 @@ function translateStatus(status) {
     return "--";
   }
   if (["played", "fulltime", "full time", "ft"].includes(normalized)) {
-    return "已完赛";
+    return tx("已完赛");
   }
   if (["playing", "live", "firsthalf", "secondhalf", "halftime"].includes(normalized)) {
-    return "进行中";
+    return tx("进行中");
   }
   if (["fixture", "prematch", "scheduled"].includes(normalized)) {
-    return "未开始";
+    return tx("未开始");
   }
-  return status;
+  return tx(status);
 }
 
 function getVenue(matchInfo) {
@@ -2115,11 +2429,11 @@ function goalsSummary(goals, home, away) {
   }
   const homeGoals = goals
     .filter((goal) => goal.side === "home")
-    .map((goal) => `${goal.player || "未知"} ${formatMinute(goal.minute)}`);
+    .map((goal) => `${goal.player || tx("未知")} ${formatMinute(goal.minute)}`);
   const awayGoals = goals
     .filter((goal) => goal.side === "away")
-    .map((goal) => `${goal.player || "未知"} ${formatMinute(goal.minute)}`);
-  return [`${home.shortName}: ${homeGoals.join(", ") || "-"}`, `${away.shortName}: ${awayGoals.join(", ") || "-"}`].join(" | ");
+    .map((goal) => `${goal.player || tx("未知")} ${formatMinute(goal.minute)}`);
+  return [`${teamDisplayName(home, true)}: ${homeGoals.join(", ") || "-"}`, `${teamDisplayName(away, true)}: ${awayGoals.join(", ") || "-"}`].join(" | ");
 }
 
 function flagImageUrl(team) {
@@ -2131,7 +2445,7 @@ function flagImageUrl(team) {
 function renderInlineFlag(team) {
   const url = flagImageUrl(team);
   if (url) {
-    return `<img class="inline-flag" src="${escapeHtml(url)}" alt="${escapeHtml(team.shortName || team.name || "球队")}" loading="lazy" />`;
+    return `<img class="inline-flag" src="${escapeHtml(url)}" alt="${escapeHtml(teamDisplayName(team, true))}" loading="lazy" />`;
   }
   return `<span class="inline-flag fallback">${escapeHtml(initials(team?.shortName || team?.name))}</span>`;
 }
@@ -2141,15 +2455,15 @@ function renderFlag(target, team) {
   const url = flagImageUrl(team);
   if (url) {
     const image = document.createElement("img");
-    image.alt = team.shortName || team.name;
+    image.alt = teamDisplayName(team, true);
     image.src = url;
     image.onerror = () => {
-      target.textContent = initials(team.name);
+      target.textContent = initials(teamDisplayName(team));
     };
     target.appendChild(image);
     return;
   }
-  target.textContent = initials(team.name);
+  target.textContent = initials(teamDisplayName(team));
 }
 
 function initials(value) {
@@ -2193,12 +2507,20 @@ function hideError() {
   refs.error.textContent = "";
 }
 
-function setSync(text, ready) {
+function setSyncStatus(key, ready, time = null) {
+  state.syncKey = key;
+  state.syncReady = Boolean(ready);
+  state.syncTime = time;
+  renderSyncStatus();
+}
+
+function renderSyncStatus() {
   if (refs.syncText) {
-    refs.syncText.textContent = text;
+    const suffix = state.syncTime ? ` ${formatClock(state.syncTime)}` : "";
+    refs.syncText.textContent = `${tx(state.syncKey)}${suffix}`;
   }
   if (refs.liveDot) {
-    refs.liveDot.classList.toggle("ready", Boolean(ready));
+    refs.liveDot.classList.toggle("ready", state.syncReady);
   }
 }
 
