@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "操作成功！",
+  "code": 200,
+  "result": {
+    "errorCode": "10313",
+    "token": "volatile-token"
+  },
+  "timestamp": 1780560142184
+}
+

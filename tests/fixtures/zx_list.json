@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "message": "操作成功！",
+  "code": 200,
+  "result": {
+    "match": [
+      {
+        "matchInfo": {
+          "id": "fixture-list-1",
+          "description": "中国U16 vs 日本U16",
+          "localDate": "2025-07-04",
+          "localTime": "19:35:00",
+          "competition": {"name": "U16国家队友谊赛"},
+          "tournamentCalendar": {"id": "tmcl-2025"},
+          "stage": {"id": "stage-1"},
+          "contestant": [
+            {"position": "home", "name": "中国U16", "shortName": "中国"},
+            {"position": "away", "name": "日本U16", "shortName": "日本"}
+          ]
+        },
+        "liveData": {
+          "matchDetails": {
+            "matchStatus": "Played",
+            "scores": {"total": {"home": 1, "away": 1}}
+          }
+        }
+      }
+    ]
+  },
+  "timestamp": 1780560000000
+}
+

@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "message": "操作成功！",
+  "code": 200,
+  "result": {
+    "matchInfo": {
+      "id": "d4vguyrwop1mcc3d9a9ox280k",
+      "description": "中国 vs 俄罗斯",
+      "localDate": "2026-06-03",
+      "localTime": "19:35:00",
+      "lastUpdated": "2026-06-04T07:23:54Z",
+      "competition": {"name": "女足友谊赛"},
+      "tournamentCalendar": {"id": "8onhsmn4720dr6y0l3c77lm38"},
+      "stage": {"id": "d9jbwf3ruhtpf00tx7y4vrv9w"},
+      "contestant": [
+        {"position": "home", "name": "中国", "shortName": "中国", "id": "home-team"},
+        {"position": "away", "name": "俄罗斯", "shortName": "俄罗斯", "id": "away-team"}
+      ]
+    },
+    "liveData": {
+      "matchDetails": {
+        "matchStatus": "Played",
+        "scores": {"total": {"home": 0, "away": 0}}
+      }
+    }
+  },
+  "timestamp": 1780560000000
+}
+

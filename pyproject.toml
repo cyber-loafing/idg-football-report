@@ -1,0 +1,33 @@
+[project]
+name = "cfa-local-monitor"
+version = "0.1.0"
+description = "Local mirror and data monitor for the CFA match site."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.8.0",
+    "uvicorn[standard]>=0.30.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[project.scripts]
+cfa-monitor = "cfa_monitor.main:run"
+cfa-mirror-site = "cfa_monitor.mirror:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cfa_monitor"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
