@@ -116,6 +116,12 @@ const TEXT_TRANSLATIONS = {
   "传球、成功率、传中和预期助攻": { en: "Passing, accuracy, crosses and xA", es: "Pase, precisión, centros y xA" },
   "出场时间、触球、过人和对抗": { en: "Minutes, touches, dribbles and duels", es: "Minutos, toques, regates y duelos" },
   "对抗、夺回、解围和抢断": { en: "Duels, recoveries, clearances and tackles", es: "Duelos, recuperaciones, despejes y entradas" },
+  "进球、射门和关键进攻表现": { en: "Goals, shots and key attacking output", es: "Goles, tiros y producción ofensiva clave" },
+  "助攻、机会创造和传球效率": { en: "Assists, chance creation and passing efficiency", es: "Asistencias, creación de ocasiones y eficiencia de pase" },
+  "过人、对抗和球权表现": { en: "Dribbles, duels and possession actions", es: "Regates, duelos y acciones de posesión" },
+  "抢断、拦截和防守贡献": { en: "Tackles, interceptions and defensive contribution", es: "Entradas, intercepciones y contribución defensiva" },
+  "前三": { en: "Top 3", es: "Top 3" },
+  "球队总计": { en: "Team Total", es: "Total del equipo" },
   "xG": { en: "xG", es: "xG" },
   "xA": { en: "xA", es: "xA" },
   "射门": { en: "Shots", es: "Tiros" },
@@ -124,6 +130,16 @@ const TEXT_TRANSLATIONS = {
   "传球": { en: "Passes", es: "Pases" },
   "成功率": { en: "Accuracy", es: "Precisión" },
   "传中": { en: "Crosses", es: "Centros" },
+  "助攻": { en: "Assists", es: "Asistencias" },
+  "创造机会": { en: "Chances Created", es: "Ocasiones creadas" },
+  "传球成功率%": { en: "Pass Accuracy %", es: "Precisión de pase %" },
+  "进攻三区传球成功率%": { en: "Final Third Pass Accuracy %", es: "Precisión en último tercio %" },
+  "过人": { en: "Successful Dribbles", es: "Regates completados" },
+  "争抢成功": { en: "Duels Won", es: "Duelos ganados" },
+  "高空球争抢成功": { en: "Aerial Duels Won", es: "Duelos aéreos ganados" },
+  "获得球权": { en: "Recoveries", es: "Recuperaciones" },
+  "失去球权": { en: "Possession Lost", es: "Posesión perdida" },
+  "扑救": { en: "Saves", es: "Paradas" },
   "夺回": { en: "Recoveries", es: "Recuperaciones" },
   "时间": { en: "Minutes", es: "Minutos" },
   "触球": { en: "Touches", es: "Toques" },
@@ -153,15 +169,33 @@ const TEXT_TRANSLATIONS = {
   "控球率": { en: "Possession", es: "Posesión" },
   "禁区内射门": { en: "Shots Inside Box", es: "Tiros dentro del área" },
   "禁区外射门": { en: "Shots Outside Box", es: "Tiros fuera del área" },
+  "击中门框": { en: "Hit Woodwork", es: "Tiros al poste" },
+  "绝佳机会": { en: "Big Chances", es: "Grandes ocasiones" },
+  "对方禁区内触球": { en: "Touches in Opposition Box", es: "Toques en el área rival" },
+  "攻入进攻三区": { en: "Final Third Entries", es: "Entradas al último tercio" },
   "角球": { en: "Corners", es: "Córners" },
   "任意球": { en: "Free Kicks", es: "Tiros libres" },
   "越位": { en: "Offsides", es: "Fueras de juego" },
   "传球成功": { en: "Accurate Passes", es: "Pases precisos" },
-  "前场传球": { en: "Final Third Passes", es: "Pases en último tercio" },
-  "成功前场传球": { en: "Accurate Final Third Passes", es: "Pases precisos en último tercio" },
+  "对方半场传球": { en: "Opposition Half Passes", es: "Pases en campo rival" },
+  "对方半场传球成功率": { en: "Opposition Half Pass Accuracy", es: "Precisión de pase en campo rival" },
+  "进攻三区传球": { en: "Final Third Passes", es: "Pases en último tercio" },
+  "进攻三区传球成功": { en: "Accurate Final Third Passes", es: "Pases precisos en último tercio" },
+  "进攻三区传球成功率": { en: "Final Third Pass Accuracy", es: "Precisión de pase en último tercio" },
   "传中成功": { en: "Accurate Crosses", es: "Centros precisos" },
+  "实时体能": { en: "Live Fitness", es: "Datos físicos en vivo" },
+  "跑动距离(米)": { en: "Distance (m)", es: "Distancia (m)" },
+  "冲刺距离(米)": { en: "Sprint Distance (m)", es: "Distancia de sprint (m)" },
+  "进攻跑动距离(米)": { en: "Attacking Distance (m)", es: "Distancia ofensiva (m)" },
+  "防守跑动距离(米)": { en: "Defensive Distance (m)", es: "Distancia defensiva (m)" },
   "尝试过人": { en: "Dribbles Attempted", es: "Regates intentados" },
   "过人成功": { en: "Successful Dribbles", es: "Regates completados" },
+  "过人成功率": { en: "Dribble Success Rate", es: "Precisión de regate" },
+  "争抢": { en: "Duels", es: "Duelos" },
+  "争抢成功率": { en: "Duel Success Rate", es: "Precisión de duelos" },
+  "高空球争抢": { en: "Aerial Duels", es: "Duelos aéreos" },
+  "高空球争抢成功率": { en: "Aerial Duel Success Rate", es: "Precisión de duelos aéreos" },
+  "进攻三区获得球权": { en: "Possession Won in Final Third", es: "Recuperaciones en último tercio" },
   "对抗成功": { en: "Duels Won", es: "Duelos ganados" },
   "对抗失败": { en: "Duels Lost", es: "Duelos perdidos" },
   "高空球成功": { en: "Aerials Won", es: "Duelos aéreos ganados" },
@@ -170,6 +204,7 @@ const TEXT_TRANSLATIONS = {
   "拦截": { en: "Interceptions", es: "Intercepciones" },
   "封堵": { en: "Blocks", es: "Bloqueos" },
   "丢失球权": { en: "Possession Lost", es: "Posesión perdida" },
+  "尝试抢断": { en: "Tackles Attempted", es: "Entradas intentadas" },
   "犯规": { en: "Fouls", es: "Faltas" },
   "被犯规": { en: "Fouls Won", es: "Faltas recibidas" },
   "Substitute": { cn: "替补", en: "Substitute", es: "Suplente" },
@@ -178,6 +213,27 @@ const TEXT_TRANSLATIONS = {
   Midfielder: { cn: "中场", en: "Midfielder", es: "Centrocampista" },
   Striker: { cn: "前锋", en: "Striker", es: "Delantero" },
   Forward: { cn: "前锋", en: "Forward", es: "Delantero" },
+};
+
+const TEAM_PALETTES = {
+  china: {
+    base: "#d71920",
+    deep: "#a90f18",
+    soft: "#fff1f2",
+    border: "#f4a7ad",
+  },
+  blue: {
+    base: "#2563eb",
+    deep: "#153e9f",
+    soft: "#eff6ff",
+    border: "#b8cdfd",
+  },
+  blueAlt: {
+    base: "#0f5f99",
+    deep: "#0b3d66",
+    soft: "#edf7ff",
+    border: "#a7d5f7",
+  },
 };
 
 const tabs = [{ id: "match", label: "比赛数据" }];
@@ -517,7 +573,8 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
   const events = normalizeEvents(liveData, goals, home, away);
   const players = mergePlayerStatSources(normalizePlayers(lineups), normalizePlayers(expectedLineups));
   const fitnessModel = normalizeFitness(fitness, home, away);
-  const metricGroups = buildMetricGroups(teamStats, score);
+  const metricStats = mergeTeamFitnessStats(teamStats, fitnessModel);
+  const metricGroups = buildMetricGroups(metricStats, score);
   const playerTables = buildPlayerTables(players, fitnessModel.players);
   const matrix = normalizePassMatrix(passmatrix, home, away);
   const coaches = normalizeCoaches(lineups, home, away);
@@ -532,6 +589,7 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
     away,
     lineups,
     teamStats,
+    metricStats,
     goals,
     score,
     events,
@@ -548,8 +606,44 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
 
 function renderReport(model) {
   state.model = model;
+  applyTeamPalette(model);
   renderHeader(model);
   renderActiveView();
+}
+
+function applyTeamPalette(model) {
+  const homePalette = paletteForTeam(model.home, "home", model.away);
+  const awayPalette = paletteForTeam(model.away, "away", model.home);
+  const accentPalette = isChinaTeam(model.home) || isChinaTeam(model.away) ? TEAM_PALETTES.china : TEAM_PALETTES.blue;
+  const root = document.documentElement;
+  const values = {
+    "--home": homePalette.base,
+    "--away": awayPalette.base,
+    "--home-deep": homePalette.deep,
+    "--away-deep": awayPalette.deep,
+    "--home-soft": homePalette.soft,
+    "--away-soft": awayPalette.soft,
+    "--home-border": homePalette.border,
+    "--away-border": awayPalette.border,
+    "--accent": accentPalette.base,
+    "--accent-soft": accentPalette.soft,
+  };
+  Object.entries(values).forEach(([name, value]) => root.style.setProperty(name, value));
+}
+
+function paletteForTeam(team, side, opponent) {
+  if (isChinaTeam(team)) {
+    return TEAM_PALETTES.china;
+  }
+  if (isChinaTeam(opponent)) {
+    return TEAM_PALETTES.blue;
+  }
+  return side === "home" ? TEAM_PALETTES.blue : TEAM_PALETTES.blueAlt;
+}
+
+function isChinaTeam(team) {
+  const key = normalizeKey([team?.name, team?.shortName, team?.officialName, team?.countryId].filter(Boolean).join(" "));
+  return key.includes("中国") || key.includes("china") || key.includes("chn");
 }
 
 function renderActiveView() {
@@ -666,7 +760,20 @@ function renderCompareMetricRow(metric) {
 
 function renderEventsView(model) {
   const body = model.events.length
-    ? `<div class="timeline">${model.events.map((event) => renderEvent(event, model)).join("")}</div>`
+    ? `
+      <div class="timeline">
+        <div class="timeline-team-head" aria-hidden="true">
+          <span class="home">${escapeHtml(teamDisplayName(model.home))}</span>
+          <span></span>
+          <span class="away">${escapeHtml(teamDisplayName(model.away))}</span>
+        </div>
+        ${model.events
+          .slice()
+          .sort((a, b) => toNumber(b.minute) - toNumber(a.minute))
+          .map((event) => renderEvent(event, model))
+          .join("")}
+      </div>
+    `
     : `<div class="empty-state">${escapeHtml(tx("暂无比赛事件数据。"))}</div>`;
 
   return `
@@ -739,6 +846,8 @@ function renderLineupsView(model) {
 function renderPlayerStatsView(model, type) {
   const config = playerTableConfig(type);
   const rows = model.playerTables[type]?.[state.activeTeam] || [];
+  const rankedRows = rankPlayerRows(rows, config.columns);
+  const totals = buildPlayerTotalRow(rankedRows, config.columns, state.activeTeam);
   return `
     <section class="panel player-panel">
       <div class="panel-head player-panel-head">
@@ -749,7 +858,11 @@ function renderPlayerStatsView(model, type) {
         ${renderTeamSwitch(model)}
       </div>
       <div class="panel-body">
-        ${rows.length ? renderPlayerStatsTable(rows, config.columns) : `<div class="empty-state">${escapeHtml(tx("暂无球员统计。"))}</div>`}
+        ${
+          rows.length
+            ? `${renderPlayerStatsTable(rankedRows, config.columns, totals, config.minWidth)}${renderPlayerTopThree(rankedRows, config.columns)}`
+            : `<div class="empty-state">${escapeHtml(tx("暂无球员统计。"))}</div>`
+        }
         ${type === "general" ? renderFitnessInline(model) : ""}
       </div>
     </section>
@@ -927,13 +1040,25 @@ function renderTeamMini(team, lineup, side) {
 }
 
 function renderEvent(event, model) {
+  const side = event.side === "away" ? "away" : event.side === "home" ? "home" : "neutral";
+  const card = renderEventCard(event, model);
   return `
-    <div class="event-row">
-      <span class="event-minute">${escapeHtml(event.minuteLabel)}</span>
-      <div class="event-card">
-        <strong class="event-title">${renderEventTitle(event, model)}</strong>
-        <span>${escapeHtml(eventSubtitle(event, model))}</span>
+    <div class="event-row ${side}">
+      <div class="event-side event-side-home">${side === "home" ? card : ""}</div>
+      <div class="event-axis">
+        <span class="event-minute">${escapeHtml(event.minuteLabel)}</span>
       </div>
+      <div class="event-side event-side-away">${side === "away" ? card : ""}</div>
+      ${side === "neutral" ? `<div class="event-neutral">${card}</div>` : ""}
+    </div>
+  `;
+}
+
+function renderEventCard(event, model) {
+  return `
+    <div class="event-card">
+      <strong class="event-title">${renderEventTitle(event, model)}</strong>
+      <span>${escapeHtml(eventSubtitle(event, model))}</span>
     </div>
   `;
 }
@@ -1116,97 +1241,149 @@ function playerTableConfig(type) {
   const configs = {
     attack: {
       title: tx("球员进攻"),
-      subtitle: tx("进球、xG、射门和进攻参与"),
+      subtitle: tx("进球、射门和关键进攻表现"),
+      minWidth: 940,
       columns: [
-        ["no", tx("号码"), "no"],
-        ["player", tx("球员"), ""],
-        ["goals", tx("进球"), "num"],
-        ["xg", tx("xG"), "num"],
-        ["shots", tx("射门"), "num"],
-        ["shotsOn", tx("射正"), "num"],
-        ["actions", tx("进攻动作"), "num"],
+        statColumn("no", "号码", "no", { fixed: true }),
+        statColumn("player", "球员", "player-col", { fixed: true }),
+        statColumn("goals", "进球", "num", { keys: ["goals", "goal", "totalGoals"], teamKeys: ["goals"] }),
+        statColumn("shots", "射门", "num", { keys: ["totalScoringAtt", "totalShots", "shots"], teamKeys: ["totalScoringAtt", "totalShots", "shots"] }),
+        statColumn("shotsOn", "射正", "num", { keys: ["ontargetScoringAtt", "onTargetScoringAtt", "shotsOnTarget"], teamKeys: ["ontargetScoringAtt", "onTargetScoringAtt", "shotsOnTarget"] }),
+        statColumn("shotsIbox", "禁区内射门", "num", { keys: ["attemptsIbox", "totalAttemptsIbox"], teamKeys: ["attemptsIbox", "totalAttemptsIbox"] }),
+        statColumn("touchesOppBox", "对方禁区内触球", "num", { keys: ["touchesInOppBox"], teamKeys: ["touchesInOppBox"] }),
+        statColumn("offsides", "越位", "num", { keys: ["totalOffside", "offsides"], teamKeys: ["totalOffside", "offsides"], defaultValue: 0 }),
+        statColumn("bigChances", "绝佳机会", "num", { keys: ["bigChanceCreated"], teamKeys: ["bigChanceCreated"] }),
+        statColumn("finalThirdEntries", "攻入进攻三区", "num", { keys: ["finalThirdEntries"], teamKeys: ["finalThirdEntries"] }),
       ],
     },
     passing: {
       title: tx("球员传球"),
-      subtitle: tx("传球、成功率、传中和预期助攻"),
+      subtitle: tx("助攻、机会创造和传球效率"),
+      minWidth: 1060,
       columns: [
-        ["no", tx("号码"), "no"],
-        ["player", tx("球员"), ""],
-        ["xa", tx("xA"), "num"],
-        ["passes", tx("传球"), "num"],
-        ["accuracy", tx("成功率"), "num"],
-        ["crosses", tx("传中"), "num"],
-        ["recoveries", tx("夺回"), "num"],
+        statColumn("no", "号码", "no", { fixed: true }),
+        statColumn("player", "球员", "player-col", { fixed: true }),
+        statColumn("assists", "助攻", "num", { keys: ["goalAssist", "assists", "assist"], teamKeys: ["goalAssist", "assists", "assist"] }),
+        statColumn("chances", "创造机会", "num", { keys: ["totalAttAssist", "attAssist"], teamKeys: ["totalAttAssist", "attAssist"] }),
+        statColumn("touches", "触球", "num", { keys: ["touches", "touchesBall", "totalTouches"], teamKeys: ["touches", "touchesBall", "totalTouches"] }),
+        statColumn("passes", "传球", "num", { keys: ["totalPass", "passes"], teamKeys: ["totalPass", "passes"] }),
+        statColumn("accuratePasses", "传球成功", "num", { keys: ["accuratePass", "successfulPass", "accuratePasses"], teamKeys: ["accuratePass", "successfulPass", "accuratePasses"] }),
+        statColumn("passAccuracy", "传球成功率%", "num", {
+          ratio: { made: ["accuratePass", "successfulPass", "accuratePasses"], total: ["totalPass", "passes"] },
+          teamRatio: { made: ["accuratePass", "successfulPass", "accuratePasses"], total: ["totalPass", "passes"] },
+          decimals: 1,
+        }),
+        statColumn("finalThirdPasses", "进攻三区传球", "num", { keys: ["totalFinalThirdPasses", "finalThirdPasses"], teamKeys: ["totalFinalThirdPasses", "finalThirdPasses"] }),
+        statColumn("finalThirdPassAccuracy", "进攻三区传球成功率%", "num", {
+          ratio: { made: ["successfulFinalThirdPasses", "accurateFinalThirdPasses"], total: ["totalFinalThirdPasses", "finalThirdPasses"] },
+          teamRatio: { made: ["successfulFinalThirdPasses", "accurateFinalThirdPasses"], total: ["totalFinalThirdPasses", "finalThirdPasses"] },
+          decimals: 1,
+        }),
+        statColumn("crosses", "传中", "num", { keys: ["totalCross", "crosses"], teamKeys: ["totalCross", "crosses"] }),
       ],
     },
     general: {
       title: tx("综合数据"),
-      subtitle: tx("出场时间、触球、过人和对抗"),
+      subtitle: tx("过人、对抗和球权表现"),
+      minWidth: 1040,
       columns: [
-        ["no", tx("号码"), "no"],
-        ["player", tx("球员"), ""],
-        ["minutes", tx("时间"), "num"],
-        ["touches", tx("触球"), "num"],
-        ["dribbles", tx("过人"), "num"],
-        ["duels", tx("对抗"), "num"],
-        ["losses", tx("丢失"), "num"],
+        statColumn("no", "号码", "no", { fixed: true }),
+        statColumn("player", "球员", "player-col", { fixed: true }),
+        statColumn("dribbleAttempts", "尝试过人", "num", { keys: ["totalContest", "dribbles"], teamKeys: ["totalContest", "dribbles"] }),
+        statColumn("successfulDribbles", "过人", "num", { keys: ["wonContest", "successfulDribbles"], teamKeys: ["wonContest", "successfulDribbles"] }),
+        statColumn("duels", "争抢", "num", {
+          sum: [["duelWon", "duelsWon"], ["duelLost", "duelsLost"]],
+          teamSum: [["duelWon", "duelsWon"], ["duelLost", "duelsLost"]],
+        }),
+        statColumn("duelsWon", "争抢成功", "num", { keys: ["duelWon", "duelsWon"], teamKeys: ["duelWon", "duelsWon"] }),
+        statColumn("aerialDuels", "高空球争抢", "num", {
+          sum: [["aerialWon", "aerialDuelsWon"], ["aerialLost", "aerialDuelsLost"]],
+          teamSum: [["aerialWon", "aerialDuelsWon"], ["aerialLost", "aerialDuelsLost"]],
+        }),
+        statColumn("aerialDuelsWon", "高空球争抢成功", "num", { keys: ["aerialWon", "aerialDuelsWon"], teamKeys: ["aerialWon", "aerialDuelsWon"] }),
+        statColumn("recoveries", "获得球权", "num", { keys: ["ballRecovery", "possWon", "recoveries"], teamKeys: ["ballRecovery", "possWon", "recoveries"] }),
+        statColumn("finalThirdRecoveries", "进攻三区获得球权", "num", { keys: ["possWonAtt3rd"], teamKeys: ["possWonAtt3rd"] }),
+        statColumn("losses", "失去球权", "num", { keys: ["possLostAll", "possLost", "turnovers"], teamKeys: ["possLostAll", "possLost", "turnovers"] }),
       ],
     },
     defense: {
       title: tx("防守数据"),
-      subtitle: tx("对抗、夺回、解围和抢断"),
+      subtitle: tx("抢断、拦截和防守贡献"),
+      minWidth: 1020,
       columns: [
-        ["no", tx("号码"), "no"],
-        ["player", tx("球员"), ""],
-        ["duels", tx("对抗"), "num"],
-        ["recoveries", tx("夺回"), "num"],
-        ["clearances", tx("解围"), "num"],
-        ["tackles", tx("抢断"), "num"],
-        ["losses", tx("丢失"), "num"],
+        statColumn("no", "号码", "no", { fixed: true }),
+        statColumn("player", "球员", "player-col", { fixed: true }),
+        statColumn("tackleAttempts", "尝试抢断", "num", { keys: ["totalTackle"], teamKeys: ["totalTackle"] }),
+        statColumn("tackles", "抢断", "num", { keys: ["wonTackle", "tacklesWon"], teamKeys: ["wonTackle", "tacklesWon"] }),
+        statColumn("interceptions", "拦截", "num", { keys: ["interception", "interceptions"], teamKeys: ["interception", "interceptions"] }),
+        statColumn("fouls", "犯规", "num", { keys: ["fouls", "fkFoulLost"], teamKeys: ["fkFoulLost", "fouls"] }),
+        statColumn("foulsWon", "被犯规", "num", { keys: ["wasFouled", "fkFoulWon"], teamKeys: ["fkFoulWon", "foulsWon"] }),
+        statColumn("yellowCards", "黄牌", "num", { keys: ["yellowCard", "totalYellowCard"], teamKeys: ["totalYellowCard", "yellowCard"], defaultValue: 0 }),
+        statColumn("redCards", "红牌", "num", { keys: ["redCard", "totalRedCard"], teamKeys: ["totalRedCard", "redCard"], defaultValue: 0 }),
+        statColumn("saves", "扑救", "num", { keys: ["saves"], teamKeys: ["saves"], defaultValue: 0 }),
+        statColumn("clearances", "解围", "num", { keys: ["totalClearance", "effectiveClearance", "clearances"], teamKeys: ["totalClearance", "clearances"] }),
       ],
     },
   };
   return configs[type] || configs.general;
 }
 
-function renderPlayerStatsTable(rows, columns) {
-  const head = columns.map(([, label, className]) => `<th class="${escapeHtml(className)}">${escapeHtml(label)}</th>`).join("");
+function statColumn(key, label, className = "", options = {}) {
+  return { key, label, className, ...options };
+}
+
+function renderPlayerStatsTable(rows, columns, totalRow, minWidth) {
+  const head = columns.map((column) => `<th class="${escapeHtml(column.className || "")}">${escapeHtml(tx(column.label))}</th>`).join("");
   const body = rows
     .map(
       (row) => `
         <tr>
-          ${columns.map(([key, , className]) => renderPlayerStatsCell(row, key, className)).join("")}
+          ${columns.map((column) => renderPlayerStatsCell(row, column)).join("")}
         </tr>
       `,
     )
     .join("");
+  const total = totalRow
+    ? `
+      <tfoot>
+        <tr>
+          ${columns.map((column) => renderPlayerStatsCell(totalRow, column, true)).join("")}
+        </tr>
+      </tfoot>
+    `
+    : "";
 
   return `
-    <div class="table-wrap player-table-wrap">
+    <div class="table-wrap player-table-wrap" style="--player-table-min:${Number(minWidth) || 760}px">
       <table class="data-table player-stats-table">
         <thead><tr>${head}</tr></thead>
         <tbody>${body}</tbody>
+        ${total}
       </table>
     </div>
   `;
 }
 
-function renderPlayerStatsCell(row, key, className) {
+function renderPlayerStatsCell(row, column, isTotal = false) {
+  const { key, className = "" } = column;
   if (key === "no") {
-    return `<td class="${escapeHtml(className)}"><span class="stat-pill ${row.side}">${escapeHtml(row.no || "--")}</span></td>`;
+    const content = isTotal ? "" : `<span class="stat-pill ${row.side}">${escapeHtml(row.no || "--")}</span>`;
+    return `<td class="${escapeHtml(className)}">${content}</td>`;
   }
   if (key === "player") {
     return `
-      <td>
+      <td class="${escapeHtml(className)}">
         <span class="player-name">
-          <strong>${escapeHtml(row.player)}</strong>
-          <span>${escapeHtml(translatePosition(row.position || "--"))}</span>
+          <strong>${escapeHtml(isTotal ? tx("球队总计") : row.player)}</strong>
+          ${isTotal ? "" : `<span>${escapeHtml(translatePosition(row.position || "--"))}</span>`}
         </span>
       </td>
     `;
   }
-  return `<td class="${escapeHtml(className)}">${escapeHtml(row[key] ?? "--")}</td>`;
+  const rank = row.heat?.[key];
+  const side = row.side || "";
+  const value = row[key] ?? "";
+  return `<td class="${escapeHtml([className, rank ? `heat-${rank}` : "", side, isTotal ? "team-total-cell" : ""].filter(Boolean).join(" "))}">${escapeHtml(value)}</td>`;
 }
 
 function renderFitnessInline(model) {
@@ -1305,7 +1482,8 @@ function pitchYValues(rowCount, side) {
   if (rowCount <= 1) {
     return [(min + max) / 2];
   }
-  return Array.from({ length: rowCount }, (_, index) => min + ((max - min) * index) / (rowCount - 1));
+  const values = Array.from({ length: rowCount }, (_, index) => min + ((max - min) * index) / (rowCount - 1));
+  return side === "home" ? values.reverse() : values;
 }
 
 function pitchX(index, count) {
@@ -1838,6 +2016,26 @@ function buildQuickStats(teamStats, score, events, fitness) {
   ];
 }
 
+function mergeTeamFitnessStats(teamStats, fitness) {
+  const bySide = Object.fromEntries((fitness?.teams || []).map((team) => [team.side, team]));
+  return {
+    home: { ...(teamStats.home || {}), ...fitnessTeamStats(bySide.home) },
+    away: { ...(teamStats.away || {}), ...fitnessTeamStats(bySide.away) },
+  };
+}
+
+function fitnessTeamStats(team) {
+  if (!team) {
+    return {};
+  }
+  return {
+    fitnessTotalDistance: team.totalDistance,
+    fitnessSprintDistance: team.sprintDistance,
+    fitnessOffensiveDistance: team.offensiveDistance,
+    fitnessDefensiveDistance: team.defensiveDistance,
+  };
+}
+
 function buildMetricGroups(teamStats, score) {
   const groupDefinitions = [
     {
@@ -1847,28 +2045,56 @@ function buildMetricGroups(teamStats, score) {
         { label: "xG", keys: ["expectedGoals", "expectedGoal", "xG", "expected_goals"], decimals: 2 },
         { label: "射门", keys: ["totalScoringAtt", "totalShots", "shots"] },
         { label: "射正", keys: ["ontargetScoringAtt", "onTargetScoringAtt", "shotOnTarget", "shotsOnTarget"] },
-        { label: "禁区内射门", keys: ["attIboxGoal", "attemptsIbox", "totalAttemptsIbox"] },
-        { label: "禁区外射门", keys: ["attOboxGoal", "attemptsObox", "totalAttemptsObox"] },
+        { label: "禁区内射门", keys: ["attemptsIbox", "totalAttemptsIbox", "attIboxTotal"] },
+        { label: "禁区外射门", keys: ["attemptsObox", "totalAttemptsObox", "attOboxTotal"] },
+        { label: "击中门框", keys: ["hitWoodwork", "postScoringAtt"], defaultValue: 0 },
+        { label: "绝佳机会", keys: ["bigChanceCreated"] },
+        { label: "对方禁区内触球", keys: ["touchesInOppBox", "touchesInPenaltyArea", "penAreaTouches"] },
+        { label: "攻入进攻三区", keys: ["finalThirdEntries"] },
         { label: "角球", keys: ["wonCorners", "cornerTaken", "corners"] },
         { label: "任意球", keys: ["fkFoulWon", "freeKicks"] },
-        { label: "越位", keys: ["totalOffside", "offsides"] },
+        { label: "越位", keys: ["totalOffside", "offsides"], defaultValue: 0 },
       ],
     },
     {
       title: "传控",
       rows: [
-        { label: "控球率", keys: ["possessionPercentage", "possession", "possessionPct"], suffix: "%" },
+        { label: "控球率", keys: ["possessionPercentage", "possession", "possessionPct"], suffix: "%", decimals: 1 },
         { label: "传球", keys: ["totalPass", "passes"] },
         { label: "传球成功", keys: ["accuratePass", "successfulPass", "accuratePasses"] },
         {
           label: "传球成功率",
           ratio: { made: ["accuratePass", "successfulPass", "accuratePasses"], total: ["totalPass", "passes"] },
           suffix: "%",
+          decimals: 1,
         },
-        { label: "前场传球", keys: ["totalFinalThirdPasses", "finalThirdPasses"] },
-        { label: "成功前场传球", keys: ["successfulFinalThirdPasses", "accurateFinalThirdPasses"] },
+        { label: "对方半场传球", keys: ["totalFwdZonePass", "fwdZonePasses"] },
+        {
+          label: "对方半场传球成功率",
+          ratio: { made: ["accurateFwdZonePass"], total: ["totalFwdZonePass", "fwdZonePasses"] },
+          suffix: "%",
+          decimals: 1,
+        },
+        { label: "进攻三区传球", keys: ["totalFinalThirdPasses", "finalThirdPasses"] },
+        { label: "进攻三区传球成功", keys: ["successfulFinalThirdPasses", "accurateFinalThirdPasses"] },
+        {
+          label: "进攻三区传球成功率",
+          ratio: { made: ["successfulFinalThirdPasses", "accurateFinalThirdPasses"], total: ["totalFinalThirdPasses", "finalThirdPasses"] },
+          suffix: "%",
+          decimals: 1,
+        },
         { label: "传中", keys: ["totalCross", "crosses"] },
         { label: "传中成功", keys: ["accurateCross", "successfulCrosses"] },
+        { label: "角球", keys: ["wonCorners", "cornerTaken", "corners"] },
+      ],
+    },
+    {
+      title: "实时体能",
+      rows: [
+        { label: "跑动距离(米)", keys: ["fitnessTotalDistance"] },
+        { label: "冲刺距离(米)", keys: ["fitnessSprintDistance"] },
+        { label: "进攻跑动距离(米)", keys: ["fitnessOffensiveDistance"] },
+        { label: "防守跑动距离(米)", keys: ["fitnessDefensiveDistance"] },
       ],
     },
     {
@@ -1877,6 +2103,27 @@ function buildMetricGroups(teamStats, score) {
         { label: "触球", keys: ["touches", "touchesBall", "totalTouches"] },
         { label: "尝试过人", keys: ["totalContest", "dribbles"] },
         { label: "过人成功", keys: ["wonContest", "successfulDribbles"] },
+        {
+          label: "过人成功率",
+          ratio: { made: ["wonContest", "successfulDribbles"], total: ["totalContest", "dribbles"] },
+          suffix: "%",
+          decimals: 1,
+        },
+        { label: "争抢", sum: [["duelWon", "duelsWon"], ["duelLost", "duelsLost"]] },
+        {
+          label: "争抢成功率",
+          ratio: { made: ["duelWon", "duelsWon"], totalSum: [["duelWon", "duelsWon"], ["duelLost", "duelsLost"]] },
+          suffix: "%",
+          decimals: 1,
+        },
+        { label: "高空球争抢", sum: [["aerialWon", "aerialDuelsWon"], ["aerialLost", "aerialDuelsLost"]] },
+        {
+          label: "高空球争抢成功率",
+          ratio: { made: ["aerialWon", "aerialDuelsWon"], totalSum: [["aerialWon", "aerialDuelsWon"], ["aerialLost", "aerialDuelsLost"]] },
+          suffix: "%",
+          decimals: 1,
+        },
+        { label: "进攻三区获得球权", keys: ["possWonAtt3rd", "possWonFinalThird"] },
         { label: "对抗成功", keys: ["duelWon", "duelsWon"] },
         { label: "对抗失败", keys: ["duelLost", "duelsLost"] },
         { label: "高空球成功", keys: ["aerialWon", "aerialDuelsWon"] },
@@ -1887,7 +2134,8 @@ function buildMetricGroups(teamStats, score) {
     {
       title: "防守&纪律",
       rows: [
-        { label: "抢断", keys: ["totalTackle", "wonTackle", "tackles"] },
+        { label: "尝试抢断", keys: ["totalTackle", "tacklesAttempted"] },
+        { label: "抢断", keys: ["wonTackle", "tacklesWon"] },
         { label: "解围", keys: ["totalClearance", "clearances"] },
         { label: "拦截", keys: ["interception", "interceptions"] },
         { label: "封堵", keys: ["blockedScoringAtt", "blockedShots"] },
@@ -1895,7 +2143,7 @@ function buildMetricGroups(teamStats, score) {
         { label: "犯规", keys: ["fkFoulLost", "fouls", "totalFouls"] },
         { label: "被犯规", keys: ["fkFoulWon", "foulsWon"] },
         { label: "黄牌", keys: ["totalYellowCard", "yellowCard", "yellowCards"] },
-        { label: "红牌", keys: ["totalRedCard", "redCard", "redCards"] },
+        { label: "红牌", keys: ["totalRedCard", "redCard", "redCards"], defaultValue: 0 },
       ],
     },
   ];
@@ -1909,8 +2157,10 @@ function buildMetricGroups(teamStats, score) {
 }
 
 function buildMetricGroupRow(definition, teamStats) {
-  const homeRaw = definition.home ?? metricRawValue(teamStats.home, definition);
-  const awayRaw = definition.away ?? metricRawValue(teamStats.away, definition);
+  const homeValue = definition.home ?? metricRawValue(teamStats.home, definition);
+  const awayValue = definition.away ?? metricRawValue(teamStats.away, definition);
+  const homeRaw = hasMetricValue(homeValue) ? homeValue : definition.defaultValue;
+  const awayRaw = hasMetricValue(awayValue) ? awayValue : definition.defaultValue;
   if (!hasMetricValue(homeRaw) && !hasMetricValue(awayRaw)) {
     return null;
   }
@@ -1929,9 +2179,12 @@ function buildMetricGroupRow(definition, teamStats) {
 }
 
 function metricRawValue(stats, definition) {
+  if (definition.sum) {
+    return sumStats(stats, definition.sum);
+  }
   if (definition.ratio) {
     const made = pickStat(stats, definition.ratio.made);
-    const total = pickStat(stats, definition.ratio.total);
+    const total = definition.ratio.totalSum ? sumStats(stats, definition.ratio.totalSum) : pickStat(stats, definition.ratio.total);
     if (!hasMetricValue(made) || !hasMetricValue(total)) {
       return null;
     }
@@ -1939,6 +2192,14 @@ function metricRawValue(stats, definition) {
     return value === null ? null : value * 100;
   }
   return pickStat(stats, definition.keys || []);
+}
+
+function sumStats(stats, keyGroups) {
+  const values = keyGroups.map((keys) => pickStat(stats, keys));
+  if (!values.some(hasMetricValue)) {
+    return null;
+  }
+  return values.reduce((sum, value) => sum + toNumber(value), 0);
 }
 
 function mergePlayerStatSources(players, expectedPlayers) {
@@ -1987,46 +2248,202 @@ function buildPlayerTables(players) {
 }
 
 function buildPlayerTableRows(players, side, type) {
+  const config = playerTableConfig(type);
   return players
     .filter((player) => player.side === side)
-    .map((player) => buildPlayerTableRow(player, type))
+    .map((player) => buildPlayerTableRow(player, type, config.columns))
     .sort((a, b) => b.sortValue - a.sortValue || toNumber(a.no) - toNumber(b.no));
 }
 
-function buildPlayerTableRow(player, type) {
-  const base = {
+function buildPlayerTableRow(player, type, columns) {
+  const row = {
     side: player.side,
     no: player.shirt || "--",
     player: player.name,
     position: player.positionCode || player.position || player.status || "--",
-    goals: playerStatLabel(player, ["goals", "goal", "totalGoals"]),
-    xg: playerStatLabel(player, ["expectedGoals", "expectedGoal", "xG", "expected_goals"], "", 2),
-    shots: playerStatLabel(player, ["totalScoringAtt", "totalShots", "shots"]),
-    shotsOn: playerStatLabel(player, ["ontargetScoringAtt", "onTargetScoringAtt", "shotsOnTarget"]),
-    actions: playerStatLabel(player, ["touches", "touchesBall", "totalTouches", "attAssist", "totalAttAssist"]),
-    xa: playerStatLabel(player, ["expectedAssists", "expectedAssist", "xA", "expected_assists"], "", 2),
-    passes: playerStatLabel(player, ["totalPass", "passes"]),
-    accuracy: playerRatioLabel(player, ["accuratePass", "successfulPass", "accuratePasses"], ["totalPass", "passes"]),
-    crosses: playerStatLabel(player, ["totalCross", "crosses"]),
-    recoveries: playerStatLabel(player, ["ballRecovery", "possWon", "recoveries"]),
-    minutes: playerStatLabel(player, ["minsPlayed", "minutesPlayed", "minutes", "totalMins"]),
-    touches: playerStatLabel(player, ["touches", "touchesBall", "totalTouches"]),
-    dribbles: playerFractionLabel(player, ["wonContest", "successfulDribbles"], ["totalContest", "dribbles"]),
-    duels: playerSumLabel(player, ["duelWon", "duelsWon"], ["duelLost", "duelsLost"]),
-    losses: playerStatLabel(player, ["possLostAll", "possLost", "turnovers"]),
-    clearances: playerStatLabel(player, ["totalClearance", "clearances"]),
-    tackles: playerStatLabel(player, ["totalTackle", "wonTackle", "tackles"]),
+    rawValues: {},
+    ratioParts: {},
+    heat: {},
   };
-  const sortKeys = {
-    attack: ["goals", "xg", "shots", "shotsOn"],
-    passing: ["passes", "accuracyRaw", "xa"],
-    general: ["minutes", "touches", "duelsRaw"],
-    defense: ["recoveries", "duelsRaw", "clearances", "tackles"],
-  };
+
+  columns.forEach((column) => {
+    if (column.key === "no" || column.key === "player") {
+      return;
+    }
+    const raw = playerColumnRawValue(player, column);
+    row.rawValues[column.key] = raw;
+    row[column.key] = playerColumnLabel(raw, column);
+    if (column.ratio) {
+      row.ratioParts[column.key] = playerColumnRatioParts(player, column);
+    }
+  });
+
   return {
-    ...base,
-    sortValue: sortKeys[type].reduce((sum, key, index) => sum + toNumber(base[key]) * 10 ** (sortKeys[type].length - index), 0),
+    ...row,
+    sortValue: playerTableSortValue(row, type),
   };
+}
+
+function playerTableSortValue(row, type) {
+  const sortKeys = {
+    attack: ["goals", "shots", "shotsOn", "touchesOppBox"],
+    passing: ["assists", "chances", "passes", "passAccuracy"],
+    general: ["recoveries", "duels", "dribbleAttempts", "losses"],
+    defense: ["tackles", "interceptions", "clearances", "saves"],
+  };
+  const keys = sortKeys[type] || sortKeys.general;
+  return keys.reduce((sum, key, index) => sum + toNumber(row.rawValues?.[key]) * 10 ** (keys.length - index), 0);
+}
+
+function playerColumnRawValue(player, column) {
+  let raw = null;
+  if (column.sum) {
+    raw = sumStats(player.statMap, column.sum);
+  } else if (column.ratio) {
+    const parts = playerColumnRatioParts(player, column);
+    const value = ratio(parts.made, parts.total);
+    raw = value === null ? null : value * 100;
+  } else {
+    raw = pickStat(player.statMap, column.keys || []);
+  }
+
+  if (!hasMetricValue(raw) && Object.prototype.hasOwnProperty.call(column, "defaultValue")) {
+    return column.defaultValue;
+  }
+  return raw;
+}
+
+function playerColumnRatioParts(player, column) {
+  return {
+    made: pickStat(player.statMap, column.ratio?.made || []),
+    total: column.ratio?.totalSum ? sumStats(player.statMap, column.ratio.totalSum) : pickStat(player.statMap, column.ratio?.total || []),
+  };
+}
+
+function playerColumnLabel(raw, column) {
+  return formatMetricValue(raw, column.suffix || "", column.decimals || 0);
+}
+
+function rankPlayerRows(rows, columns) {
+  const rankedRows = rows.map((row) => ({ ...row, heat: {} }));
+  columns.filter(isRankableColumn).forEach((column) => {
+    rankedRows
+      .filter((row) => Number.isFinite(toNumber(row.rawValues?.[column.key])) && toNumber(row.rawValues?.[column.key]) > 0)
+      .sort((a, b) => toNumber(b.rawValues[column.key]) - toNumber(a.rawValues[column.key]))
+      .slice(0, 3)
+      .forEach((row, index) => {
+        row.heat[column.key] = index + 1;
+      });
+  });
+  return rankedRows;
+}
+
+function isRankableColumn(column) {
+  return column.key !== "no" && column.key !== "player" && !column.fixed;
+}
+
+function buildPlayerTotalRow(rows, columns, side) {
+  const totalRow = {
+    side,
+    no: "",
+    player: tx("球队总计"),
+    position: "",
+    rawValues: {},
+    ratioParts: {},
+    heat: {},
+  };
+
+  columns.forEach((column) => {
+    if (!isRankableColumn(column)) {
+      return;
+    }
+    const raw = column.ratio ? ratioTotalFromRows(rows, column.key) : summedTotalFromRows(rows, column.key, column);
+    totalRow.rawValues[column.key] = raw;
+    totalRow[column.key] = playerColumnLabel(raw, { ...column, decimals: column.teamDecimals ?? column.decimals });
+  });
+
+  return totalRow;
+}
+
+function ratioTotalFromRows(rows, key) {
+  const totals = rows.reduce(
+    (acc, row) => {
+      const parts = row.ratioParts?.[key] || {};
+      if (hasMetricValue(parts.made)) {
+        acc.made += toNumber(parts.made);
+      }
+      if (hasMetricValue(parts.total)) {
+        acc.total += toNumber(parts.total);
+      }
+      return acc;
+    },
+    { made: 0, total: 0 },
+  );
+  const value = ratio(totals.made, totals.total);
+  return value === null ? null : value * 100;
+}
+
+function summedTotalFromRows(rows, key, column) {
+  let seen = false;
+  const total = rows.reduce((sum, row) => {
+    const value = row.rawValues?.[key];
+    if (!hasMetricValue(value)) {
+      return sum;
+    }
+    seen = true;
+    return sum + toNumber(value);
+  }, 0);
+  if (seen) {
+    return total;
+  }
+  return Object.prototype.hasOwnProperty.call(column, "defaultValue") ? column.defaultValue : null;
+}
+
+function renderPlayerTopThree(rows, columns) {
+  const cards = columns
+    .filter(isRankableColumn)
+    .map((column) => {
+      const leaders = rows
+        .filter((row) => Number.isFinite(toNumber(row.rawValues?.[column.key])) && toNumber(row.rawValues?.[column.key]) > 0)
+        .sort((a, b) => toNumber(b.rawValues[column.key]) - toNumber(a.rawValues[column.key]))
+        .slice(0, 3);
+      if (!leaders.length) {
+        return "";
+      }
+      return `
+        <article class="top-three-card ${escapeHtml(state.activeTeam)}">
+          <h3>${escapeHtml(tx(column.label))}</h3>
+          <div class="top-three-list">
+            ${leaders
+              .map(
+                (row, index) => `
+                  <div class="top-three-row heat-${index + 1}">
+                    <span class="top-three-rank">${index + 1}</span>
+                    <span class="top-three-player">${escapeHtml(row.player)}</span>
+                    <strong>${escapeHtml(playerColumnLabel(row.rawValues[column.key], column))}</strong>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+        </article>
+      `;
+    })
+    .filter(Boolean)
+    .join("");
+
+  if (!cards) {
+    return "";
+  }
+
+  return `
+    <section class="top-three-heatmap">
+      <div class="top-three-head">
+        <h3>${escapeHtml(tx("前三"))}</h3>
+      </div>
+      <div class="top-three-grid">${cards}</div>
+    </section>
+  `;
 }
 
 function playerStatLabel(player, keys, suffix = "", decimals = 0) {
