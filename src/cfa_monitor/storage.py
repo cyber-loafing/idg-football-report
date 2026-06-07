@@ -179,6 +179,21 @@ class Database:
             rows = conn.execute("SELECT * FROM fixtures ORDER BY COALESCE(local_date, '') DESC, id").fetchall()
         return [dict(row) for row in rows]
 
+    def list_monitor_candidate_fixture_ids(self) -> list[str]:
+        final_statuses = ("Played", "Cancelled", "Postponed", "Abandoned", "Awarded")
+        placeholders = ", ".join("?" for _ in final_statuses)
+        with self.connect() as conn:
+            rows = conn.execute(
+                f"""
+                SELECT id
+                FROM fixtures
+                WHERE status IS NULL OR status = '' OR status NOT IN ({placeholders})
+                ORDER BY updated_at DESC
+                """,
+                final_statuses,
+            ).fetchall()
+        return [str(row["id"]) for row in rows if row["id"]]
+
     def get_fixture(self, fixture_id: str) -> dict[str, Any] | None:
         with self.connect() as conn:
             row = conn.execute("SELECT * FROM fixtures WHERE id = ?", (fixture_id,)).fetchone()

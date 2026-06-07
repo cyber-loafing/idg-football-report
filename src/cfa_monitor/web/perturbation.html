@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>数据扰动策略</title>
+    <style>
+      :root {
+        --bg: #f3f6fa;
+        --panel: #ffffff;
+        --ink: #172033;
+        --muted: #68778a;
+        --line: #dfe6ef;
+        --red: #d71920;
+        --blue: #2563eb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter,
+          "Segoe UI",
+          "PingFang SC",
+          "Microsoft YaHei",
+          Arial,
+          sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .page {
+        display: grid;
+        gap: 16px;
+        width: min(1440px, calc(100% - 32px));
+        margin: 24px auto;
+      }
+
+      .hero,
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 16px 36px rgba(23, 32, 51, 0.08);
+      }
+
+      .hero {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px 22px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .hero p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .primary {
+        min-height: 38px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--red);
+        color: #fff;
+        cursor: pointer;
+        font-weight: 900;
+      }
+
+      .panel {
+        overflow: hidden;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .toolbar input {
+        width: min(420px, 100%);
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+      }
+
+      .summary {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .table-wrap {
+        overflow: auto;
+        max-height: calc(100vh - 210px);
+      }
+
+      table {
+        width: 100%;
+        min-width: 1240px;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      th,
+      td {
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+        color: #405066;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      td strong {
+        display: block;
+        min-width: 130px;
+      }
+
+      td small {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+      }
+
+      .locked {
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: #eef2f7;
+        color: #526173;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .pill.ok {
+        background: #eaf2ff;
+        color: var(--blue);
+      }
+
+      .pill.locked {
+        background: #f5f5f5;
+        color: #7d8794;
+      }
+
+      .range {
+        display: grid;
+        grid-template-columns: 76px 76px;
+        gap: 6px;
+      }
+
+      .clamp {
+        display: grid;
+        grid-template-columns: 72px 72px;
+        gap: 6px;
+      }
+
+      td input[type="number"],
+      td select {
+        width: 100%;
+        min-height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      td input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--red);
+      }
+
+      .note {
+        max-width: 260px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          width: 100%;
+          margin: 0;
+        }
+
+        .hero,
+        .panel {
+          border-right: 0;
+          border-left: 0;
+          border-radius: 0;
+        }
+
+        .hero,
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div>
+          <h1>数据扰动策略</h1>
+          <p>只影响本地接口返回和页面显示，不修改原始快照。</p>
+        </div>
+        <div class="actions">
+          <span class="status" data-status>加载中</span>
+          <button class="primary" type="button" data-save>保存策略</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="toolbar">
+          <input data-search placeholder="搜索字段、页面或来源" />
+          <span class="summary" data-summary></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>页面</th>
+                <th>字段</th>
+                <th>来源</th>
+                <th>能否扰动</th>
+                <th>启用</th>
+                <th>方法</th>
+                <th>扰动范围</th>
+                <th>取整</th>
+                <th>上下限</th>
+                <th>约束 / 备注</th>
+              </tr>
+            </thead>
+            <tbody data-body></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const refs = {
+        body: document.querySelector("[data-body]"),
+        save: document.querySelector("[data-save]"),
+        status: document.querySelector("[data-status]"),
+        summary: document.querySelector("[data-summary]"),
+        search: document.querySelector("[data-search]"),
+      };
+
+      let catalog = [];
+      let policy = { fields: {} };
+
+      init();
+
+      async function init() {
+        try {
+          const [catalogResponse, policyResponse] = await Promise.all([
+            fetch("/api/perturbation/catalog"),
+            fetch("/api/perturbation/policy"),
+          ]);
+          catalog = await catalogResponse.json();
+          policy = await policyResponse.json();
+          render();
+          setStatus("已加载");
+        } catch (error) {
+          setStatus(`加载失败: ${error.message || error}`);
+        }
+      }
+
+      function render() {
+        const keyword = refs.search.value.trim().toLowerCase();
+        const rows = catalog.filter((field) => {
+          if (!keyword) return true;
+          return `${field.page} ${field.label} ${field.source} ${field.notes}`.toLowerCase().includes(keyword);
+        });
+        refs.body.innerHTML = rows.map(renderRow).join("");
+        refs.summary.textContent = `${rows.length} / ${catalog.length} 个字段`;
+      }
+
+      function renderRow(field) {
+        const rule = policy.fields[field.field_id] || {};
+        const disabled = field.perturbable ? "" : "disabled";
+        const defaultRange = field.default_range || {};
+        const method = rule.method || defaultRange.method || "delta";
+        const rounding = rule.rounding || defaultRange.rounding || "int";
+        const min = valueForInput(rule.min ?? defaultRange.min ?? 0);
+        const max = valueForInput(rule.max ?? defaultRange.max ?? 0);
+        const clampMin = valueForInput(rule.clamp_min ?? defaultRange.clamp_min ?? "");
+        const clampMax = valueForInput(rule.clamp_max ?? defaultRange.clamp_max ?? "");
+        return `
+          <tr data-row data-field-id="${escapeAttr(field.field_id)}">
+            <td><span class="pill">${escapeHtml(field.page)}</span></td>
+            <td>
+              <strong>${escapeHtml(field.label)}</strong>
+              <small>${escapeHtml(field.field_id)}</small>
+            </td>
+            <td class="note">${escapeHtml(field.source)}</td>
+            <td>
+              <span class="pill ${field.perturbable ? "ok" : "locked"}">${field.perturbable ? "可以" : "锁定"}</span>
+            </td>
+            <td><input type="checkbox" data-enabled ${rule.enabled && field.perturbable ? "checked" : ""} ${disabled} /></td>
+            <td>
+              <select data-method ${disabled}>
+                <option value="delta" ${method === "delta" ? "selected" : ""}>增减</option>
+                <option value="percent" ${method === "percent" ? "selected" : ""}>百分比</option>
+              </select>
+            </td>
+            <td><div class="range"><input type="number" data-min value="${min}" step="0.1" ${disabled} /><input type="number" data-max value="${max}" step="0.1" ${disabled} /></div></td>
+            <td>
+              <select data-rounding ${disabled}>
+                <option value="int" ${rounding === "int" ? "selected" : ""}>整数</option>
+                <option value="decimal1" ${rounding === "decimal1" ? "selected" : ""}>1位小数</option>
+                <option value="decimal2" ${rounding === "decimal2" ? "selected" : ""}>2位小数</option>
+                <option value="none" ${rounding === "none" ? "selected" : ""}>不处理</option>
+              </select>
+            </td>
+            <td><div class="clamp"><input type="number" data-clamp-min value="${clampMin}" placeholder="下限" step="0.1" ${disabled} /><input type="number" data-clamp-max value="${clampMax}" placeholder="上限" step="0.1" ${disabled} /></div></td>
+            <td class="note">${escapeHtml([field.constraints, field.notes].filter(Boolean).join(" / "))}</td>
+          </tr>
+        `;
+      }
+
+      refs.save.addEventListener("click", async () => {
+        const payload = { version: 1, fields: {} };
+        document.querySelectorAll("[data-row]").forEach((row) => {
+          const fieldId = row.dataset.fieldId;
+          payload.fields[fieldId] = {
+            enabled: row.querySelector("[data-enabled]").checked,
+            method: row.querySelector("[data-method]").value,
+            min: numberOrZero(row.querySelector("[data-min]").value),
+            max: numberOrZero(row.querySelector("[data-max]").value),
+            rounding: row.querySelector("[data-rounding]").value,
+            clamp_min: numberOrNull(row.querySelector("[data-clamp-min]").value),
+            clamp_max: numberOrNull(row.querySelector("[data-clamp-max]").value),
+          };
+        });
+
+        setStatus("保存中");
+        try {
+          const response = await fetch("/api/perturbation/policy", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+          policy = await response.json();
+          render();
+          setStatus(`已保存 ${new Date().toLocaleTimeString()}`);
+        } catch (error) {
+          setStatus(`保存失败: ${error.message || error}`);
+        }
+      });
+
+      refs.search.addEventListener("input", render);
+
+      function setStatus(text) {
+        refs.status.textContent = text;
+      }
+
+      function valueForInput(value) {
+        return value === null || value === undefined ? "" : String(value);
+      }
+
+      function numberOrZero(value) {
+        const number = Number(value);
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function numberOrNull(value) {
+        if (value === "") return null;
+        const number = Number(value);
+        return Number.isFinite(number) ? number : null;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function escapeAttr(value) {
+        return escapeHtml(value);
+      }
+    </script>
+  </body>
+</html>

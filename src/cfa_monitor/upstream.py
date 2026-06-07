@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 from hashlib import sha256
+import time
 from typing import Any
 
 import httpx
@@ -18,6 +20,8 @@ class UpstreamClient:
             headers={"User-Agent": settings.user_agent, "Accept": "application/json,text/plain,*/*"},
             follow_redirects=True,
         )
+        self._locks: dict[str, asyncio.Lock] = {}
+        self._error_until: dict[str, float] = {}
 
     async def close(self) -> None:
         await self.client.aclose()
@@ -41,9 +45,27 @@ class UpstreamClient:
             if cached is not None:
                 return cached
 
-        request = self.client.build_request("GET", f"{self.settings.remote_bsapi_base}{clean_path}", params=params)
-        response = await self.client.send(request)
-        response.raise_for_status()
-        payload = response.json()
-        self.db.cache_put(cache_key, clean_path, query_string, payload, self.settings.proxy_cache_ttl_seconds)
-        return payload
+        lock = self._locks.setdefault(cache_key, asyncio.Lock())
+        async with lock:
+            if use_cache:
+                cached = self.db.cache_get(cache_key, utc_now())
+                if cached is not None:
+                    return cached
+                error_until = self._error_until.get(cache_key, 0)
+                if error_until > time.monotonic():
+                    raise httpx.TimeoutException("Recent upstream failure is cooling down.")
+
+            request = self.client.build_request("GET", f"{self.settings.remote_bsapi_base}{clean_path}", params=params)
+            try:
+                response = await self.client.send(request)
+                response.raise_for_status()
+                payload = response.json()
+            except Exception:
+                if use_cache:
+                    cooldown = max(30.0, self.settings.proxy_cache_ttl_seconds)
+                    self._error_until[cache_key] = time.monotonic() + cooldown
+                raise
+
+            self._error_until.pop(cache_key, None)
+            self.db.cache_put(cache_key, clean_path, query_string, payload, self.settings.proxy_cache_ttl_seconds)
+            return payload

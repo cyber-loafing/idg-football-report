@@ -22,6 +22,7 @@ class MonitorService:
         self._stop = asyncio.Event()
         self._next_due: dict[str, float] = {}
         self._error_counts: dict[str, int] = {}
+        self._source_locks: dict[str, asyncio.Lock] = {}
 
     def ensure_fixture(self, fixture_id: str) -> None:
         if not fixture_id:
@@ -50,59 +51,73 @@ class MonitorService:
         await self._poll_source(zx_list_source())
         fixtures = list(self._fixture_ids)
         for fixture_id in fixtures:
-            fixture = self.db.get_fixture(fixture_id) or {}
-            tmcl = fixture.get("tournament_calendar_id")
-            season_year = self._season_year(fixture)
-            for source in fixture_sources(fixture_id, tournament_calendar_id=tmcl, season_year=season_year):
-                await self._poll_source(source)
+            await self.poll_fixture_once(fixture_id)
 
-    async def _poll_source(self, source: SourceSpec) -> None:
-        now = time.monotonic()
-        if self._next_due.get(source.key, 0) > now:
-            return
-        source_url = source.params.get("url")
-        try:
-            payload = await self.upstream.fetch_bsapi(source.path, source.params, use_cache=False)
-            success = bool(isinstance(payload, dict) and payload.get("success") is True)
-            snapshot = self.db.record_snapshot(
-                fixture_id=source.fixture_id,
-                source=source.source,
-                source_url=source_url,
-                payload=payload,
-                success=success,
-            )
-            self._extract_fixtures(source, payload)
-            self._schedule_success(source)
-            if snapshot.changed:
+    async def poll_fixture_once(
+        self,
+        fixture_id: str,
+        *,
+        source_names: set[str] | None = None,
+        force: bool = False,
+    ) -> None:
+        self.ensure_fixture(fixture_id)
+        fixture = self.db.get_fixture(fixture_id) or {}
+        tmcl = fixture.get("tournament_calendar_id")
+        season_year = self._season_year(fixture)
+        for source in fixture_sources(fixture_id, tournament_calendar_id=tmcl, season_year=season_year):
+            if source_names is not None and source.source not in source_names:
+                continue
+            await self._poll_source(source, force=force)
+
+    async def _poll_source(self, source: SourceSpec, *, force: bool = False) -> None:
+        lock = self._source_locks.setdefault(source.key, asyncio.Lock())
+        async with lock:
+            now = time.monotonic()
+            if self._next_due.get(source.key, 0) > now:
+                return
+            source_url = source.params.get("url")
+            try:
+                payload = await self.upstream.fetch_bsapi(source.path, source.params, use_cache=False)
+                success = bool(isinstance(payload, dict) and payload.get("success") is True)
+                snapshot = self.db.record_snapshot(
+                    fixture_id=source.fixture_id,
+                    source=source.source,
+                    source_url=source_url,
+                    payload=payload,
+                    success=success,
+                )
+                self._extract_fixtures(source, payload)
+                self._schedule_success(source)
+                if snapshot.changed:
+                    await self.events.publish(
+                        {
+                            "event": "change",
+                            "fixture_id": source.fixture_id,
+                            "source": source.source,
+                            "content_hash": snapshot.content_hash,
+                            "event_id": snapshot.event_id,
+                            "observed_at": utc_now(),
+                        }
+                    )
+            except Exception as exc:  # noqa: BLE001 - background monitor must keep running.
+                count = self.db.record_poll_error(
+                    source.key,
+                    source.fixture_id,
+                    source.source,
+                    source_url,
+                    f"{type(exc).__name__}: {exc}",
+                )
+                self._schedule_error(source, count)
                 await self.events.publish(
                     {
-                        "event": "change",
+                        "event": "poll_error",
                         "fixture_id": source.fixture_id,
                         "source": source.source,
-                        "content_hash": snapshot.content_hash,
-                        "event_id": snapshot.event_id,
+                        "error_count": count,
+                        "error": str(exc),
                         "observed_at": utc_now(),
                     }
                 )
-        except Exception as exc:  # noqa: BLE001 - background monitor must keep running.
-            count = self.db.record_poll_error(
-                source.key,
-                source.fixture_id,
-                source.source,
-                source_url,
-                f"{type(exc).__name__}: {exc}",
-            )
-            self._schedule_error(source, count)
-            await self.events.publish(
-                {
-                    "event": "poll_error",
-                    "fixture_id": source.fixture_id,
-                    "source": source.source,
-                    "error_count": count,
-                    "error": str(exc),
-                    "observed_at": utc_now(),
-                }
-            )
 
     def _base_interval(self, source: SourceSpec) -> float:
         if source.interval_kind == "list":

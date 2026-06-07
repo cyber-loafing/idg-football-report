@@ -49,3 +49,26 @@ async def test_monitor_discovers_fixtures_and_records_snapshots(tmp_path: Path) 
     assert "d4vguyrwop1mcc3d9a9ox280k" in ids
     assert db.latest_snapshots("d4vguyrwop1mcc3d9a9ox280k")["matchstats"]["success"] is True
 
+
+@pytest.mark.asyncio
+async def test_monitor_can_force_refresh_single_fixture(tmp_path: Path) -> None:
+    settings = Settings(
+        data_dir=tmp_path,
+        db_path=tmp_path / "test.sqlite3",
+        configured_fixtures=(),
+        monitor_enabled=False,
+        list_interval_seconds=100,
+        core_interval_seconds=100,
+        aux_interval_seconds=100,
+    )
+    db = Database(settings.db_path)
+    db.init()
+    upstream = FakeUpstream()
+    monitor = MonitorService(settings, db, upstream, EventHub())  # type: ignore[arg-type]
+
+    await monitor.poll_fixture_once("runtime-fixture", source_names={"matchstats"}, force=True)
+    await monitor.poll_fixture_once("runtime-fixture", source_names={"matchstats"}, force=True)
+
+    assert db.latest_snapshots("runtime-fixture")["matchstats"]["success"] is True
+    assert len(upstream.calls) == 1
+    assert upstream.calls[0][0] == "/api/data/zx"

@@ -117,9 +117,46 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
   margin-bottom: 14px;
   color: rgba(255, 255, 255, 0.88);
   font-size: 12px;
+}
+
+.hero-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.hero-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  max-width: 190px;
+  padding: 3px 8px 3px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #26313d;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hero-brand-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.hero-brand span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hero-actions {
@@ -1252,27 +1289,31 @@ button {
 
   .rail-brand {
     display: grid;
-    gap: 7px;
+    gap: 8px;
     padding: 4px 4px 12px;
     border-bottom: 1px solid var(--line);
   }
 
   .brand-mark {
-    display: inline-flex;
-    width: 48px;
-    height: 32px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    background: linear-gradient(120deg, var(--home), var(--away));
-    color: #fff;
-    font-weight: 800;
+    display: grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 8px;
+    background: #f4f6f8;
   }
 
   .brand-text {
     color: var(--ink);
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
   }
 
   .rail-tabs {

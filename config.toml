@@ -5,9 +5,10 @@ port = 8000
 [monitor]
 enabled = true
 list_interval_seconds = 30
-core_interval_seconds = 15
+core_interval_seconds = 30
 aux_interval_seconds = 30
 max_backoff_seconds = 300
+proxy_cache_ttl_seconds = 30
 
 fixtures = [
   "d4vguyrwop1mcc3d9a9ox280k",

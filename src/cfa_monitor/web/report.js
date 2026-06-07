@@ -1,12 +1,13 @@
 const DEFAULT_FIXTURE_ID = "cq1wnjypozp0xc3b1z3b2hlp0";
 const DEFAULT_LANGUAGE = "cn";
+const REPORT_BRAND_TITLE = "IDG FOOTBALL GROUP";
 const LANGUAGES = ["cn", "en", "es"];
 const LANGUAGE_LABELS = { cn: "CN", en: "EN", es: "ES" };
 const HTML_LANG = { cn: "zh-CN", en: "en", es: "es" };
 const TIME_LOCALE = { cn: "zh-CN", en: "en-US", es: "es-ES" };
 
 const TEXT_TRANSLATIONS = {
-  "CFA Match Report": { cn: "CFA 比赛报告", en: "CFA Match Report", es: "Informe de partido CFA" },
+  "IDG FOOTBALL GROUP": { cn: "IDG FOOTBALL GROUP", en: "IDG FOOTBALL GROUP", es: "IDG FOOTBALL GROUP" },
   "Match Center": { cn: "比赛中心", en: "Match Center", es: "Centro de partido" },
   Language: { cn: "语言", en: "Language", es: "Idioma" },
   Venue: { cn: "场地", en: "Venue", es: "Sede" },
@@ -396,8 +397,8 @@ function setLanguage(language) {
 
 function renderLanguageSwitch() {
   document.documentElement.lang = HTML_LANG[state.lang] || HTML_LANG.cn;
-  document.title = tx("CFA Match Report");
-  setText(refs.brandText, tx("Match Center"));
+  document.title = tx(REPORT_BRAND_TITLE);
+  setText(refs.brandText, tx(REPORT_BRAND_TITLE));
   setText(refs.venueLabel, tx("Venue"));
   setText(refs.goalsLabel, tx("Goals"));
   if (refs.mobileTabs) {

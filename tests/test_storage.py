@@ -63,3 +63,26 @@ def test_fixture_upsert_preserves_existing_metadata_on_sparse_payload(tmp_path: 
     assert fixture is not None
     assert fixture["description"] == "中国 vs 俄罗斯"
     assert fixture["source"] == "squads"
+
+
+def test_monitor_candidates_include_non_final_fixtures(tmp_path: Path) -> None:
+    db = Database(tmp_path / "test.sqlite3")
+    db.init()
+    base = load_fixture("matchstats.json")["result"]
+
+    playing = json.loads(json.dumps(base))
+    playing["matchInfo"]["id"] = "playing-fixture"
+    playing["liveData"]["matchDetails"]["matchStatus"] = "Playing"
+    db.upsert_fixture("playing-fixture", playing, source="matchstats")
+
+    played = json.loads(json.dumps(base))
+    played["matchInfo"]["id"] = "played-fixture"
+    played["liveData"]["matchDetails"]["matchStatus"] = "Played"
+    db.upsert_fixture("played-fixture", played, source="matchstats")
+
+    db.ensure_fixture("unknown-fixture")
+
+    candidates = set(db.list_monitor_candidate_fixture_ids())
+    assert "playing-fixture" in candidates
+    assert "unknown-fixture" in candidates
+    assert "played-fixture" not in candidates
