@@ -565,10 +565,19 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
   const expectedLiveData = getLiveData(expectedGoals);
   const expectedSource = Object.keys(expectedLiveData).length ? expectedLiveData : unwrapPayload(expectedGoals) || {};
   const expectedLineups = normalizeLineups(expectedSource, home, away);
-  const teamStats = {
-    home: mergeStats(lineups.home.stats, expectedLineups.home.stats),
-    away: mergeStats(lineups.away.stats, expectedLineups.away.stats),
+  const expectedEventStats = aggregateExpectedGoalEvents(expectedSource, home, away);
+  const expectedTeamStats = {
+    home: mergeStats(expectedLineups.home.stats, expectedEventStats.home),
+    away: mergeStats(expectedLineups.away.stats, expectedEventStats.away),
   };
+  preferExpectedGoals(expectedTeamStats.home, expectedEventStats.home);
+  preferExpectedGoals(expectedTeamStats.away, expectedEventStats.away);
+  const teamStats = {
+    home: mergeStats(lineups.home.stats, expectedTeamStats.home),
+    away: mergeStats(lineups.away.stats, expectedTeamStats.away),
+  };
+  preferExpectedGoals(teamStats.home, expectedTeamStats.home);
+  preferExpectedGoals(teamStats.away, expectedTeamStats.away);
   const goals = normalizeGoals(liveData, home, away);
   const score = normalizeScore(liveData, matchInfo, goals);
   const events = normalizeEvents(liveData, goals, home, away);
@@ -1738,6 +1747,55 @@ function normalizeLineup(lineup, team, substitutions = []) {
     starters: starters.length ? starters : players.slice(0, 11),
     substitutes,
   };
+}
+
+function aggregateExpectedGoalEvents(liveData, home, away) {
+  const totals = { home: 0, away: 0 };
+  let hasExpectedGoals = false;
+
+  arrayOf(liveData?.event || liveData?.events).forEach((event) => {
+    const xg = expectedGoalValueFromEvent(event);
+    if (xg === null) {
+      return;
+    }
+    const side = sideForTeam(event.contestantId || event.teamId || event.contestantName || event.teamName, home, away);
+    if (!side) {
+      return;
+    }
+    totals[side] += xg;
+    hasExpectedGoals = true;
+  });
+
+  if (!hasExpectedGoals) {
+    return { home: {}, away: {} };
+  }
+  return {
+    home: { expectedGoals: totals.home },
+    away: { expectedGoals: totals.away },
+  };
+}
+
+function preferExpectedGoals(targetStats, sourceStats) {
+  const expectedGoals = pickStat(sourceStats, ["expectedGoals", "expectedGoal", "xG", "expected_goals"]);
+  if (hasMetricValue(expectedGoals)) {
+    targetStats.expectedGoals = expectedGoals;
+  }
+}
+
+function expectedGoalValueFromEvent(event) {
+  const direct = valueFrom(event, ["expectedGoals", "expectedGoal", "xG", "expected_goals"]);
+  if (direct !== null && direct !== undefined && direct !== "") {
+    const number = parseNumeric(direct);
+    return Number.isFinite(number) ? number : null;
+  }
+  const qualifier = arrayOf(event?.qualifier || event?.qualifiers).find(
+    (item) => Number(item?.qualifierId ?? item?.id ?? item?.typeId) === 321 && item?.value !== undefined && item?.value !== null,
+  );
+  if (!qualifier) {
+    return null;
+  }
+  const number = parseNumeric(qualifier.value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function normalizePlayer(player, team, subMaps = { on: new Map(), off: new Map() }, forceSubstitute = false) {
