@@ -6,7 +6,7 @@ from cfa_monitor.config import Settings
 from cfa_monitor.main import create_app
 
 
-def test_report_ui_routes_and_source_config(tmp_path: Path) -> None:
+def test_frontend_is_not_served_by_fastapi(tmp_path: Path) -> None:
     settings = Settings(
         data_dir=tmp_path,
         db_path=tmp_path / "test.sqlite3",
@@ -15,14 +15,12 @@ def test_report_ui_routes_and_source_config(tmp_path: Path) -> None:
     )
     client = TestClient(create_app(settings))
 
-    page = client.get("/ui/?id=cq1wnjypozp0xc3b1z3b2hlp0")
-    assert page.status_code == 200
-    assert "/ui/assets/report.css" in page.text
-    assert "/ui/assets/report.js" in page.text
+    root = client.get("/")
+    assert root.status_code == 200
+    assert root.json()["frontend"] == "served-by-nginx"
 
-    script = client.get("/ui/assets/report.js")
-    assert script.status_code == 200
-    assert "cq1wnjypozp0xc3b1z3b2hlp0" in script.text
+    assert client.get("/ui/?id=cq1wnjypozp0xc3b1z3b2hlp0").status_code == 404
+    assert client.get("/admin/perturbation").status_code == 404
 
     source_config = client.get("/api/source-config")
     assert source_config.status_code == 200

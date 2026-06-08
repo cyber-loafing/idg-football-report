@@ -128,13 +128,11 @@ def test_latest_endpoint_applies_policy_without_mutating_snapshot(tmp_path: Path
     assert db.latest_snapshots("fx")["matchstats"]["payload"]["result"]["liveData"]["lineUp"][0]["stat"][0]["value"] == "10"
 
 
-def test_perturbation_admin_and_policy_routes(tmp_path: Path) -> None:
+def test_perturbation_policy_routes_without_admin_static_hosting(tmp_path: Path) -> None:
     settings = Settings(data_dir=tmp_path, db_path=tmp_path / "test.sqlite3", monitor_enabled=False)
     client = TestClient(create_app(settings))
 
-    page = client.get("/admin/perturbation")
-    assert page.status_code == 200
-    assert "数据扰动策略" in page.text
+    assert client.get("/admin/perturbation").status_code == 404
 
     catalog = client.get("/api/perturbation/catalog")
     assert catalog.status_code == 200

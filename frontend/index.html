@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>IDG FOOTBALL GROUP</title>
+  </head>
+  <body>
+    <div class="app-shell" data-app-shell>
+      <aside class="desktop-rail" aria-label="比赛导航">
+        <div class="rail-brand">
+          <span class="brand-mark" aria-hidden="true">
+            <img class="brand-logo" src="%BASE_URL%assets/zjuidg_grey.7ede8459.svg" alt="" />
+          </span>
+          <span class="brand-text" data-brand-text>IDG FOOTBALL GROUP</span>
+        </div>
+        <nav class="rail-tabs" data-desktop-tabs></nav>
+        <div class="rail-status">
+          <span class="status-dot" data-live-dot></span>
+          <span data-sync-text>等待数据</span>
+        </div>
+      </aside>
+
+      <main class="phone-shell">
+        <header class="match-hero">
+          <div class="hero-content">
+            <div class="hero-topbar">
+              <div class="hero-meta">
+                <span class="hero-brand">
+                  <img class="hero-brand-logo" src="%BASE_URL%assets/zjuidg_grey.7ede8459.svg" alt="" />
+                  <span>IDG FOOTBALL GROUP</span>
+                </span>
+                <span class="hero-date" data-match-date>--</span>
+              </div>
+              <div class="hero-actions">
+                <span class="hero-state" data-match-status>--</span>
+                <div class="lang-switch" data-lang-switch aria-label="Language"></div>
+              </div>
+            </div>
+
+            <div class="match-title-card">
+              <div class="match-title-text">
+                <strong data-competition>比赛数据</strong>
+                <span data-stage>常规赛</span>
+              </div>
+            </div>
+
+            <div class="score-grid">
+              <section class="team home">
+                <div class="flag-badge" data-home-flag></div>
+                <h1 data-home-name>主队</h1>
+              </section>
+
+              <section class="score-status">
+                <div class="score-line">
+                  <span data-home-score>-</span>
+                  <span class="score-sep">-</span>
+                  <span data-away-score>-</span>
+                </div>
+                <p data-period>--</p>
+              </section>
+
+              <section class="team away">
+                <div class="flag-badge" data-away-flag></div>
+                <h1 data-away-name>客队</h1>
+              </section>
+            </div>
+
+            <div class="venue-card">
+              <div>
+                <span class="field-label" data-label-venue>Venue</span>
+                <strong data-venue>--</strong>
+              </div>
+              <div>
+                <span class="field-label" data-label-goals>Goals</span>
+                <strong data-goals-summary>--</strong>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <nav class="tabs-top" data-mobile-tabs aria-label="比赛数据标签"></nav>
+
+        <section class="content-area">
+          <div class="notice" data-error hidden></div>
+          <section class="view-stack" data-view-stack></section>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/report/main.js"></script>
+  </body>
+</html>

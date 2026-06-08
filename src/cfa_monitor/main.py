@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
@@ -27,7 +27,6 @@ FINAL_MATCH_STATUSES = {"played", "cancelled", "postponed", "abandoned", "awarde
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
     ensure_runtime_dirs(settings)
-    web_root = Path(__file__).resolve().parent / "web"
     db = Database(settings.db_path)
     db.init()
     events = EventHub()
@@ -68,30 +67,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.mount("/zx/static", StaticFiles(directory=settings.static_root / "static"), name="zx-static")
     if (settings.static_root / "assets").exists():
         app.mount("/zx/assets", StaticFiles(directory=settings.static_root / "assets"), name="zx-assets")
-    if web_root.exists():
-        app.mount("/ui/assets", StaticFiles(directory=web_root), name="ui-assets")
 
     @app.get("/")
     async def root() -> dict[str, str]:
         return {
             "service": "cfa-local-monitor",
             "site": "/zx/",
-            "report": "/ui/",
-            "perturbation": "/admin/perturbation",
+            "frontend": "served-by-nginx",
             "events": "/api/events",
         }
-
-    @app.get("/ui")
-    async def ui_redirect() -> RedirectResponse:
-        return RedirectResponse("/ui/")
-
-    @app.get("/ui/")
-    @app.get("/ui/{path:path}")
-    async def ui_index(path: str = ""):
-        index_path = web_root / "report.html"
-        if not index_path.exists():
-            return PlainTextResponse("Report UI is missing.", status_code=503)
-        return FileResponse(index_path, media_type="text/html")
 
     @app.get("/zx/")
     @app.get("/zx/index.html")
@@ -103,13 +87,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 status_code=503,
             )
         return FileResponse(index_path, media_type="text/html")
-
-    @app.get("/admin/perturbation")
-    async def perturbation_admin():
-        page_path = web_root / "perturbation.html"
-        if not page_path.exists():
-            return PlainTextResponse("Perturbation admin UI is missing.", status_code=503)
-        return FileResponse(page_path, media_type="text/html")
 
     @app.get("/bsApi/{path:path}")
     async def bsapi_proxy(path: str, request: Request) -> JSONResponse:
