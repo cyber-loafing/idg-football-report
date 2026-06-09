@@ -446,7 +446,7 @@ async function loadReport() {
       perform_competition_id: "10n54vtx4fi2s1frl9ipw2t6bu",
       fitness_game_infos: {},
     }));
-    const fixtureId = await resolveFixtureId();
+    const fixtureId = await resolveFixtureId(sourceConfig);
     state.fixtureId = fixtureId;
 
     const latest = await fetchJson(apiUrl(`/fixtures/${encodeURIComponent(fixtureId)}/latest`)).catch(() => ({
@@ -493,10 +493,15 @@ async function loadReport() {
   }
 }
 
-async function resolveFixtureId() {
+async function resolveFixtureId(sourceConfig = {}) {
   const fromUrl = fixtureIdFromUrl();
   if (fromUrl) {
     return fromUrl;
+  }
+
+  const backendDefault = String(sourceConfig.default_fixture_id || "").trim();
+  if (backendDefault) {
+    return backendDefault;
   }
 
   const fixtures = await fetchJson(apiUrl("/fixtures")).catch(() => []);
@@ -580,12 +585,24 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
   const goals = normalizeGoals(liveData, home, away);
   const score = normalizeScore(liveData, matchInfo, goals);
   const events = normalizeEvents(liveData, goals, home, away);
-  const players = mergePlayerStatSources(normalizePlayers(lineups), normalizePlayers(expectedLineups));
+  const basePlayers = mergePlayerStatSources(normalizePlayers(lineups), normalizePlayers(expectedLineups));
+  const matrix = normalizePassMatrix(passmatrix, home, away);
+  const players = applyMatrixDerivedPassing(basePlayers, matrix);
+  const matrixTeamStats = deriveTeamAccuratePassesFromPlayers(players);
+  if (hasMetricValue(matrixTeamStats.home)) {
+    teamStats.home.accuratePass = matrixTeamStats.home;
+    teamStats.home.successfulPass = matrixTeamStats.home;
+    teamStats.home.accuratePasses = matrixTeamStats.home;
+  }
+  if (hasMetricValue(matrixTeamStats.away)) {
+    teamStats.away.accuratePass = matrixTeamStats.away;
+    teamStats.away.successfulPass = matrixTeamStats.away;
+    teamStats.away.accuratePasses = matrixTeamStats.away;
+  }
   const fitnessModel = normalizeFitness(fitness, home, away);
   const metricStats = mergeTeamFitnessStats(teamStats, fitnessModel);
   const metricGroups = buildMetricGroups(metricStats, score);
   const playerTables = buildPlayerTables(players, fitnessModel.players);
-  const matrix = normalizePassMatrix(passmatrix, home, away);
   const coaches = normalizeCoaches(lineups, home, away);
 
   return {
@@ -2577,6 +2594,66 @@ function normalizePassMatrixTeam(lineup) {
     links: links.sort((a, b) => toNumber(b.value) - toNumber(a.value)),
     max,
   };
+}
+
+function applyMatrixDerivedPassing(players, matrix) {
+  const passByPlayer = new Map();
+  ["home", "away"].forEach((side) => {
+    arrayOf(matrix?.[side]?.rows).forEach((row) => {
+      const total = arrayOf(row.cells).reduce((sum, cell) => sum + toNumber(cell.value), 0);
+      const player = row.player || {};
+      buildPlayerLookupKeys({
+        id: player.id,
+        shirt: player.shirt,
+        name: player.name,
+        side,
+      }).forEach((key) => passByPlayer.set(key, total));
+    });
+  });
+
+  return players.map((player) => {
+    const key = buildPlayerLookupKeys(player).find((item) => passByPlayer.has(item));
+    if (!key) {
+      return player;
+    }
+    const accurate = passByPlayer.get(key);
+    const statMap = {
+      ...(player.statMap || {}),
+      accuratePass: accurate,
+      successfulPass: accurate,
+      accuratePasses: accurate,
+    };
+    return {
+      ...player,
+      statMap,
+      stats: {
+        ...(player.stats || {}),
+        passes: pickStat(statMap, ["totalPass", "passes"]),
+      },
+    };
+  });
+}
+
+function deriveTeamAccuratePassesFromPlayers(players) {
+  const totals = { home: null, away: null };
+  ["home", "away"].forEach((side) => {
+    const group = players.filter((player) => player.side === side);
+    const values = group
+      .map((player) => pickStat(player.statMap, ["accuratePass", "successfulPass", "accuratePasses"]))
+      .filter(hasMetricValue);
+    if (values.length) {
+      totals[side] = values.reduce((sum, value) => sum + toNumber(value), 0);
+    }
+  });
+  return totals;
+}
+
+function buildPlayerLookupKeys(player) {
+  return [
+    player.id ? `id:${player.id}` : "",
+    player.shirt ? `shirt:${player.side}:${player.shirt}` : "",
+    player.name ? `name:${player.side}:${normalizeKey(player.name)}` : "",
+  ].filter(Boolean);
 }
 
 function normalizeCoaches(lineups) {

@@ -38,33 +38,17 @@ cd frontend
 npm run build
 ```
 
-构建产物会写入 `frontend/dist`。FastAPI 只提供 `/api/...`、`/bsApi/...` 和 `/zx/...`，不再托管 `/ui/` 或 `/admin/perturbation`。
+构建产物会写入 `frontend/dist`。当前部署前缀固定为 `/idg-football-report`，因此外部访问路径为：
 
-Nginx 需要将 `/ui/` 指向 `frontend/dist/index.html`，将 `/admin/perturbation` 指向 `frontend/dist/perturbation.html`，并反代 `/api/`、`/bsApi/` 到后端。示例：
+- `/idg-football-report/ui/`
+- `/idg-football-report/admin/perturbation`
+- `/idg-football-report/api/...`
+- `/idg-football-report/bsApi/...`
+- `/idg-football-report/zx/...`
 
-```nginx
-location /ui/assets/ {
-    alias /path/to/idg-football-report/frontend/dist/assets/;
-}
+FastAPI 进程本身仍只监听本机 `127.0.0.1:8000` 的 `/api/...`、`/bsApi/...` 和 `/zx/...`，由 Nginx 负责加前缀反代。
 
-location /ui/ {
-    alias /path/to/idg-football-report/frontend/dist/;
-    try_files $uri /index.html;
-}
-
-location = /admin/perturbation {
-    root /path/to/idg-football-report/frontend/dist;
-    try_files /perturbation.html =404;
-}
-
-location /api/ {
-    proxy_pass http://127.0.0.1:8000/api/;
-}
-
-location /bsApi/ {
-    proxy_pass http://127.0.0.1:8000/bsApi/;
-}
-```
+Nginx 需要把仓库内的 `deploy/nginx/idg-football-report.conf` 作为 `location` 片段 include 到现有 `server` 里，不再单独建新站点。
 
 后端启动后可直接访问 API 和原站镜像：
 
@@ -100,4 +84,48 @@ http://10.196.28.64:8000/zx/#/pages/tabBar/detail?id=cq1wnjypozp0xc3b1z3b2hlp0
 ```bash
 uv run pytest
 cd frontend && npm run build && npm run lint && npm run test:config
+```
+
+## Deployment
+
+按 `Nginx + uv + tmux` 部署：
+
+```bash
+# 1. 安装后端依赖
+./scripts/deploy_backend.sh
+
+# 2. 构建前端，默认生成 /idg-football-report/ui/ 这一套路径
+./scripts/deploy_frontend.sh
+
+# 3. 启动后端常驻进程
+./scripts/tmux_backend.sh start
+./scripts/tmux_backend.sh status
+./scripts/tmux_backend.sh logs
+```
+
+Nginx 使用现有站点 `/etc/nginx/sites-available/server.conf`，把下面这行加进 443 的 `server { ... }` 内：
+
+```bash
+include /home/zjuidg/idg-football-report/deploy/nginx/idg-football-report.conf;
+```
+
+然后 reload：
+
+```bash
+sudo systemctl reload nginx
+```
+
+后端默认监听 `0.0.0.0:8000`，由 Nginx 反代：
+
+- `/idg-football-report/ui/` -> `frontend/dist/index.html`
+- `/idg-football-report/admin/perturbation` -> `frontend/dist/perturbation.html`
+- `/idg-football-report/api/` -> FastAPI
+- `/idg-football-report/bsApi/` -> FastAPI
+- `/idg-football-report/zx/` -> FastAPI 原站镜像
+
+tmux 会在启动时先执行一次 `uv run cfa-mirror-site`，随后常驻运行 `uv run cfa-monitor`。停止或重启：
+
+```bash
+./scripts/tmux_backend.sh stop
+./scripts/tmux_backend.sh restart
 ```

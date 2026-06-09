@@ -119,6 +119,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {
             "perform_competition_id": PERFORM_COMPETITION_ID,
             "fitness_game_infos": FITNESS_GAME_INFOS,
+            "default_fixture_id": settings.configured_fixtures[0] if settings.configured_fixtures else None,
         }
 
     @app.get("/api/perturbation/catalog")

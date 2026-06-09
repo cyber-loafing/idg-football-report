@@ -19,6 +19,7 @@ BIG_COUNT_RANGE: RangeSpec = {"method": "percent", "min": -5, "max": 5, "roundin
 SMALL_DECIMAL_RANGE: RangeSpec = {"method": "delta", "min": -0.2, "max": 0.2, "rounding": "decimal2", "clamp_min": 0, "clamp_max": None}
 DISTANCE_RANGE: RangeSpec = {"method": "percent", "min": -3, "max": 3, "rounding": "int", "clamp_min": 0, "clamp_max": None}
 MATRIX_RANGE: RangeSpec = {"method": "delta", "min": -2, "max": 2, "rounding": "int", "clamp_min": 0, "clamp_max": None}
+PERCENT_RANGE: RangeSpec = {"method": "delta", "min": -5, "max": 5, "rounding": "decimal1", "clamp_min": 0, "clamp_max": 100}
 
 
 @dataclass(frozen=True)
@@ -141,17 +142,23 @@ def build_catalog() -> list[FieldDefinition]:
         team_stat("team.shots", "射门", ["totalScoringAtt", "totalShots", "shots"]),
         team_stat("team.shots_on", "射正", ["ontargetScoringAtt", "onTargetScoringAtt", "shotOnTarget", "shotsOnTarget"], constraints="整数，0 <= 射正 <= 射门"),
         team_stat("team.shots_ibox", "禁区内射门", ["attemptsIbox", "totalAttemptsIbox", "attIboxTotal"]),
-        team_stat("team.shots_obox", "禁区外射门", ["attemptsObox", "totalAttemptsObox", "attOboxTotal"]),
+        derived("team.shots_obox", "禁区外射门", "球队数据", "totalScoringAtt - attemptsIbox", "由总射门和禁区内射门自动计算"),
         team_stat("team.hit_woodwork", "击中门框", ["hitWoodwork", "postScoringAtt"]),
         team_stat("team.big_chance", "绝佳机会", ["bigChanceCreated"]),
         team_stat("team.touches_opp_box", "对方禁区内触球", ["touchesInOppBox", "touchesInPenaltyArea", "penAreaTouches"]),
         team_stat("team.final_third_entries", "攻入进攻三区", ["finalThirdEntries"]),
         team_stat("team.corners", "角球", ["wonCorners", "cornerTaken", "corners"], notes="球队数据中重复出现时共享同一原始字段"),
-        team_stat("team.free_kicks", "任意球", ["fkFoulWon", "freeKicks"], notes="与被犯规可能共享上游字段"),
         team_stat("team.offsides", "越位", ["totalOffside", "offsides"]),
-        derived("team.possession", "控球率", "球队数据", "matchstats:team.stat[possessionPercentage]", "首版不单独扰动百分比"),
+        team_stat(
+            "team.possession",
+            "控球率",
+            ["possessionPercentage", "possession", "possessionPct"],
+            range_spec=PERCENT_RANGE,
+            value_type="decimal",
+            constraints="百分比，0 <= 控球率 <= 100",
+        ),
         team_stat("team.passes", "传球", ["totalPass", "passes"], range_spec=BIG_COUNT_RANGE),
-        team_stat("team.accurate_passes", "传球成功", ["accuratePass", "successfulPass", "accuratePasses"], range_spec=BIG_COUNT_RANGE, constraints="整数，0 <= 传球成功 <= 传球"),
+        derived("team.accurate_passes", "传球成功", "球队数据", "sum(passmatrix.playerPass.value)", "由传球矩阵自动汇总"),
         derived("team.pass_accuracy", "传球成功率", "球队数据", "accuratePass / totalPass", "由传球成功和传球自动计算"),
         team_stat("team.opp_half_passes", "对方半场传球", ["totalFwdZonePass", "fwdZonePasses"], range_spec=BIG_COUNT_RANGE),
         derived("team.opp_half_pass_accuracy", "对方半场传球成功率", "球队数据", "accurateFwdZonePass / totalFwdZonePass", "由分子/分母自动计算"),
@@ -180,15 +187,16 @@ def build_catalog() -> list[FieldDefinition]:
         team_stat("team.possession_lost", "丢失球权", ["possLostAll", "possLost", "turnovers"], range_spec=BIG_COUNT_RANGE),
         team_stat("team.fouls", "犯规", ["fkFoulLost", "fouls", "totalFouls"]),
         team_stat("team.fouls_won", "被犯规", ["fkFoulWon", "foulsWon"]),
-        team_stat("team.yellow_cards", "黄牌", ["totalYellowCard", "yellowCard", "yellowCards"]),
-        team_stat("team.red_cards", "红牌", ["totalRedCard", "redCard", "redCards"]),
+        locked("team.yellow_cards", "黄牌", "球队数据", "matchstats:card aggregation", "由红黄牌事件自动汇总"),
+        locked("team.red_cards", "红牌", "球队数据", "matchstats:card aggregation", "由红黄牌事件自动汇总"),
     ]
 
     player_attack = [
-        player_stat("player.attack.goals", "进球", "球员进攻", ["goals", "goal", "totalGoals"], constraints="整数，0 <= 进球 <= 射门"),
+        locked("player.attack.goals", "进球", "球员进攻", "matchstats:goal aggregation", "由进球事件自动汇总"),
         player_stat("player.attack.shots", "射门", "球员进攻", ["totalScoringAtt", "totalShots", "shots"]),
         player_stat("player.attack.shots_on", "射正", "球员进攻", ["ontargetScoringAtt", "onTargetScoringAtt", "shotsOnTarget"], constraints="整数，0 <= 射正 <= 射门"),
         player_stat("player.attack.shots_ibox", "禁区内射门", "球员进攻", ["attemptsIbox", "totalAttemptsIbox"]),
+        derived("player.attack.shots_obox", "禁区外射门", "球员进攻", "totalScoringAtt - attemptsIbox", "由总射门和禁区内射门自动计算"),
         player_stat("player.attack.touches_opp_box", "对方禁区内触球", "球员进攻", ["touchesInOppBox"]),
         player_stat("player.attack.offsides", "越位", "球员进攻", ["totalOffside", "offsides"]),
         player_stat("player.attack.big_chances", "绝佳机会", "球员进攻", ["bigChanceCreated"]),
@@ -200,7 +208,7 @@ def build_catalog() -> list[FieldDefinition]:
         player_stat("player.passing.chances", "创造机会", "球员传球", ["totalAttAssist", "attAssist"]),
         player_stat("player.passing.touches", "触球", "球员传球", ["touches", "touchesBall", "totalTouches"], range_spec=BIG_COUNT_RANGE),
         player_stat("player.passing.passes", "传球", "球员传球", ["totalPass", "passes"], range_spec=BIG_COUNT_RANGE),
-        player_stat("player.passing.accurate_passes", "传球成功", "球员传球", ["accuratePass", "successfulPass", "accuratePasses"], range_spec=BIG_COUNT_RANGE, constraints="整数，0 <= 传球成功 <= 传球"),
+        derived("player.passing.accurate_passes", "传球成功", "球员传球", "sum(playerPass.value)", "由传球矩阵自动汇总"),
         derived("player.passing.pass_accuracy", "传球成功率%", "球员传球", "accuratePass / totalPass", "由传球成功和传球自动计算"),
         player_stat("player.passing.final_third_passes", "进攻三区传球", "球员传球", ["totalFinalThirdPasses", "finalThirdPasses"], range_spec=BIG_COUNT_RANGE),
         derived("player.passing.final_third_pass_accuracy", "进攻三区传球成功率%", "球员传球", "successfulFinalThirdPasses / totalFinalThirdPasses", "由分子/分母自动计算"),
@@ -225,8 +233,8 @@ def build_catalog() -> list[FieldDefinition]:
         player_stat("player.defense.interceptions", "拦截", "防守数据", ["interception", "interceptions"]),
         player_stat("player.defense.fouls", "犯规", "防守数据", ["fouls", "fkFoulLost"]),
         player_stat("player.defense.fouls_won", "被犯规", "防守数据", ["wasFouled", "fkFoulWon"]),
-        player_stat("player.defense.yellow_cards", "黄牌", "防守数据", ["yellowCard", "totalYellowCard"]),
-        player_stat("player.defense.red_cards", "红牌", "防守数据", ["redCard", "totalRedCard"]),
+        locked("player.defense.yellow_cards", "黄牌", "防守数据", "matchstats:card aggregation", "由红黄牌事件自动汇总"),
+        locked("player.defense.red_cards", "红牌", "防守数据", "matchstats:card aggregation", "由红黄牌事件自动汇总"),
         player_stat("player.defense.saves", "扑救", "防守数据", ["saves"]),
         player_stat("player.defense.clearances", "解围", "防守数据", ["totalClearance", "effectiveClearance", "clearances"]),
     ]
@@ -256,10 +264,10 @@ def build_catalog() -> list[FieldDefinition]:
     ]
 
     fitness = [
-        FieldDefinition("fitness.team.total_distance", "球队总跑动", "体能数据", "zx_tnsj:Teams.TotalDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "", ({"source": "zx_tnsj", "kind": "fitness", "scope": "team", "keys": ("TotalDistance",)},)),
-        FieldDefinition("fitness.team.sprint_distance", "球队冲刺距离", "体能数据", "zx_tnsj:Teams.SprintingDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "", ({"source": "zx_tnsj", "kind": "fitness", "scope": "team", "keys": ("SprintingDistance",)},)),
-        FieldDefinition("fitness.team.offensive_distance", "球队进攻跑动", "体能数据", "zx_tnsj:Teams.OffensiveDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "", ({"source": "zx_tnsj", "kind": "fitness", "scope": "team", "keys": ("OffensiveDistance",)},)),
-        FieldDefinition("fitness.team.defensive_distance", "球队防守跑动", "体能数据", "zx_tnsj:Teams.DefensiveDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "", ({"source": "zx_tnsj", "kind": "fitness", "scope": "team", "keys": ("DefensiveDistance",)},)),
+        locked("fitness.team.total_distance", "球队总跑动", "体能数据", "sum(Players.TotalDistance)", "由球员总跑动自动汇总"),
+        locked("fitness.team.sprint_distance", "球队冲刺距离", "体能数据", "sum(Players.SprintingDistance)", "由球员冲刺距离自动汇总"),
+        locked("fitness.team.offensive_distance", "球队进攻跑动", "体能数据", "sum(Players.OffensiveDistance)", "由球员进攻跑动自动汇总"),
+        locked("fitness.team.defensive_distance", "球队防守跑动", "体能数据", "sum(Players.DefensiveDistance)", "由球员防守跑动自动汇总"),
         FieldDefinition("fitness.player.total_distance", "球员总跑动", "体能数据", "zx_tnsj:Players.TotalDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "姓名、号码、球队不扰动", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("TotalDistance",)},)),
         FieldDefinition("fitness.player.sprint_distance", "球员冲刺距离", "体能数据", "zx_tnsj:Players.SprintingDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "姓名、号码、球队不扰动", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("SprintingDistance",)},)),
     ]
@@ -434,7 +442,7 @@ class PerturbationService:
         rules: dict[tuple[str, str, str], tuple[FieldDefinition, dict[str, Any]]],
     ) -> None:
         body = self._payload_body(payload)
-        live = body.get("liveData") if isinstance(body, dict) else {}
+        live = (body.get("liveData") or {}) if isinstance(body, dict) else {}
         lineups = live.get("lineUp") or live.get("lineup") or live.get("lineups") if isinstance(live, dict) else []
         for lineup_index, lineup in enumerate(lineups or []):
             if not isinstance(lineup, dict):
@@ -446,6 +454,7 @@ class PerturbationService:
                     continue
                 player_context = str(player.get("playerId") or player.get("id") or player.get("shirtNumber") or player_index)
                 self._apply_stat_list(player.get("stat") or player.get("stats"), "player", source, fixture_id, player_context, rules)
+        self._rebalance_team_possession(lineups, rules)
 
     def _apply_stat_list(
         self,
@@ -472,6 +481,8 @@ class PerturbationService:
                 stat["total"] = adjusted
             elif "amount" in stat:
                 stat["amount"] = adjusted
+        self._derive_shot_breakdown(by_type)
+        self._clamp_subset_constraints(by_type)
         self._clamp_stat_constraints(by_type)
 
     def _clamp_stat_constraints(self, by_type: dict[str, dict[str, Any]]) -> None:
@@ -490,6 +501,86 @@ class PerturbationService:
                 if made is not None and total is not None and made > total:
                     _set_stat_value(by_type[made_key], _format_like(_stat_value(by_type[made_key]), total, "int"))
 
+    def _derive_shot_breakdown(self, by_type: dict[str, dict[str, Any]]) -> None:
+        total_stat = next((by_type[key] for key in ("totalScoringAtt", "totalShots", "shots") if key in by_type), None)
+        ibox_stat = next((by_type[key] for key in ("attemptsIbox", "totalAttemptsIbox", "attIboxTotal") if key in by_type), None)
+        obox_stat = next((by_type[key] for key in ("attemptsObox", "totalAttemptsObox", "attOboxTotal") if key in by_type), None)
+        if total_stat is None or ibox_stat is None or obox_stat is None:
+            return
+
+        total_value = _numeric(_stat_value(total_stat))
+        ibox_value = _numeric(_stat_value(ibox_stat))
+        if total_value is None or ibox_value is None:
+            return
+        ibox_value = min(max(ibox_value, 0), total_value)
+        outside_value = max(total_value - ibox_value, 0)
+        _set_stat_value(ibox_stat, _format_like(_stat_value(ibox_stat), ibox_value, "int"))
+        _set_stat_value(obox_stat, _format_like(_stat_value(obox_stat), outside_value, "int"))
+
+    def _clamp_subset_constraints(self, by_type: dict[str, dict[str, Any]]) -> None:
+        for subset_keys, total_keys in (
+            (("possWonAtt3rd", "possWonFinalThird"), ("ballRecovery", "possWon", "recoveries")),
+            (("wonTackle", "tacklesWon"), ("totalTackle", "tacklesAttempted")),
+            (("ontargetScoringAtt", "onTargetScoringAtt", "shotOnTarget", "shotsOnTarget"), ("totalScoringAtt", "totalShots", "shots")),
+            (("goals", "goal", "totalGoals"), ("totalScoringAtt", "totalShots", "shots")),
+            (("attemptsIbox", "totalAttemptsIbox", "attIboxTotal"), ("totalScoringAtt", "totalShots", "shots")),
+        ):
+            subset_stat = next((by_type[key] for key in subset_keys if key in by_type), None)
+            total_stat = next((by_type[key] for key in total_keys if key in by_type), None)
+            if subset_stat is None or total_stat is None:
+                continue
+            subset_value = _numeric(_stat_value(subset_stat))
+            total_value = _numeric(_stat_value(total_stat))
+            if subset_value is None or total_value is None:
+                continue
+            if subset_value > total_value:
+                _set_stat_value(subset_stat, _format_like(_stat_value(subset_stat), total_value, "int"))
+
+    def _rebalance_team_possession(
+        self,
+        lineups: Any,
+        rules: dict[tuple[str, str, str], tuple[FieldDefinition, dict[str, Any]]],
+    ) -> None:
+        possession_rule = None
+        possession_key_order = ("possessionPercentage", "possession", "possessionPct")
+        for key in possession_key_order:
+            rule_info = rules.get(("stat", "team", key))
+            if rule_info:
+                possession_rule = rule_info[1]
+                break
+        if possession_rule is None or not isinstance(lineups, list):
+            return
+
+        possession_stats: list[dict[str, Any]] = []
+        for lineup in lineups:
+            if not isinstance(lineup, dict):
+                continue
+            stats = lineup.get("stat") or lineup.get("stats")
+            if not isinstance(stats, list):
+                continue
+            by_type = {str(stat.get("type") or stat.get("name")): stat for stat in stats if isinstance(stat, dict) and (stat.get("type") or stat.get("name"))}
+            stat = next((by_type[key] for key in possession_key_order if key in by_type and _numeric(_stat_value(by_type[key])) is not None), None)
+            if stat is not None:
+                possession_stats.append(stat)
+        if len(possession_stats) != 2:
+            return
+
+        first_original = _stat_value(possession_stats[0])
+        first_value = _numeric(first_original)
+        if first_value is None:
+            return
+
+        clamp_min = float(possession_rule.get("clamp_min", 0) or 0)
+        clamp_max = float(possession_rule.get("clamp_max", 100) or 100)
+        first_value = min(max(first_value, clamp_min), clamp_max)
+        second_value = 100 - first_value
+        second_value = min(max(second_value, clamp_min), clamp_max)
+        first_value = 100 - second_value
+
+        rounding = str(possession_rule.get("rounding") or "decimal1")
+        _set_stat_value(possession_stats[0], _format_like(first_original, first_value, rounding))
+        _set_stat_value(possession_stats[1], _format_like(_stat_value(possession_stats[1]), second_value, rounding))
+
     def _apply_passmatrix_payload(
         self,
         payload: Any,
@@ -501,7 +592,7 @@ class PerturbationService:
             return
         field, rule = rule_info
         body = self._payload_body(payload)
-        live = body.get("liveData") if isinstance(body, dict) else {}
+        live = (body.get("liveData") or {}) if isinstance(body, dict) else {}
         for lineup in (live.get("lineUp") or live.get("lineup") or live.get("lineups") or []):
             for player in lineup.get("player") or lineup.get("players") or []:
                 player_id = str(player.get("playerId") or player.get("id") or player.get("shirtNumber") or "")
@@ -530,6 +621,45 @@ class PerturbationService:
                         continue
                     field, rule = rule_info
                     row[key] = self._perturb_value(value, rule, f"{fixture_id}:zx_tnsj:{field.field_id}:{scope}:{context}:{key}")
+        self._aggregate_team_fitness(body)
+
+    def _aggregate_team_fitness(self, body: dict[str, Any]) -> None:
+        team_rows = body.get("Teams") or body.get("teams") or []
+        player_rows = body.get("Players") or body.get("players") or []
+        if not isinstance(team_rows, list) or not isinstance(player_rows, list):
+            return
+
+        fields = (
+            "TotalDistance",
+            "SprintingDistance",
+            "OffensiveDistance",
+            "DefensiveDistance",
+        )
+        team_name_keys = ("TeamName", "teamName", "Name", "name", "ClubName")
+        player_team_keys = ("TeamName", "teamName", "ClubName", "team")
+        totals: dict[str, dict[str, float]] = {}
+        for row in player_rows:
+            if not isinstance(row, dict):
+                continue
+            team_name = next((str(row.get(key) or "").strip() for key in player_team_keys if row.get(key)), "")
+            if not team_name:
+                continue
+            bucket = totals.setdefault(team_name, {field: 0.0 for field in fields})
+            for field in fields:
+                value = _numeric(_dict_get_case_insensitive(row, field))
+                if value is not None:
+                    bucket[field] += value
+
+        for row in team_rows:
+            if not isinstance(row, dict):
+                continue
+            team_name = next((str(row.get(key) or "").strip() for key in team_name_keys if row.get(key)), "")
+            if not team_name or team_name not in totals:
+                continue
+            for field in fields:
+                actual_key = _dict_find_key_case_insensitive(row, field)
+                if actual_key is not None:
+                    row[actual_key] = _format_like(row[actual_key], totals[team_name][field], "int")
 
     def _perturb_value(self, original: Any, rule: dict[str, Any], seed: str) -> Any:
         number = _numeric(original)
@@ -604,6 +734,19 @@ def _format_like(original: Any, value: float, rounding: str) -> Any:
     if isinstance(original, int) and not isinstance(original, bool):
         return int(round(float(rounded)))
     return rounded
+
+
+def _dict_find_key_case_insensitive(row: dict[str, Any], expected: str) -> str | None:
+    normalized = str(expected).lower()
+    for key in row:
+        if str(key).lower() == normalized:
+            return str(key)
+    return None
+
+
+def _dict_get_case_insensitive(row: dict[str, Any], expected: str) -> Any:
+    actual_key = _dict_find_key_case_insensitive(row, expected)
+    return row.get(actual_key) if actual_key is not None else None
 
 
 def _stat_value(stat: dict[str, Any]) -> Any:
