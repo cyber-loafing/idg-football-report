@@ -55,11 +55,8 @@ class UpstreamClient:
                 if error_until > time.monotonic():
                     raise httpx.TimeoutException("Recent upstream failure is cooling down.")
 
-            request = self.client.build_request("GET", f"{self.settings.remote_bsapi_base}{clean_path}", params=params)
             try:
-                response = await self.client.send(request)
-                response.raise_for_status()
-                payload = response.json()
+                payload = await self._send_bsapi_with_retries(clean_path, params)
             except Exception:
                 if use_cache:
                     cooldown = max(30.0, self.settings.proxy_cache_ttl_seconds)
@@ -69,3 +66,30 @@ class UpstreamClient:
             self._error_until.pop(cache_key, None)
             self.db.cache_put(cache_key, clean_path, query_string, payload, self.settings.proxy_cache_ttl_seconds)
             return payload
+
+    async def _send_bsapi_with_retries(self, clean_path: str, params: dict[str, Any]) -> Any:
+        attempts = 4 if is_retryable_fitness_path(clean_path) else 1
+        payload: Any = None
+        for attempt in range(attempts):
+            request = self.client.build_request("GET", f"{self.settings.remote_bsapi_base}{clean_path}", params=params)
+            response = await self.client.send(request)
+            response.raise_for_status()
+            payload = response.json()
+            if not is_fitness_detail_error(clean_path, payload):
+                return payload
+            if attempt < attempts - 1:
+                await asyncio.sleep(0.35)
+        return payload
+
+
+def is_retryable_fitness_path(path: str) -> bool:
+    return path.rstrip("/").endswith("/api/data/zx_tnsj")
+
+
+def is_fitness_detail_error(path: str, payload: Any) -> bool:
+    if not is_retryable_fitness_path(path):
+        return False
+    if not (isinstance(payload, dict) and payload.get("success") is True):
+        return False
+    result = payload.get("result")
+    return isinstance(result, dict) and bool(result.get("detail"))

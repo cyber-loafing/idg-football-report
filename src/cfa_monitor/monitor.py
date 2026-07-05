@@ -12,6 +12,10 @@ from .storage import Database, utc_after, utc_now
 from .upstream import UpstreamClient
 
 
+FINAL_MATCH_STATUSES = {"played", "cancelled", "postponed", "abandoned", "awarded"}
+LIVE_MATCH_STATUSES = {"playing", "live"}
+
+
 class MonitorService:
     def __init__(self, settings: Settings, db: Database, upstream: UpstreamClient, events: EventHub):
         self.settings = settings
@@ -23,6 +27,7 @@ class MonitorService:
         self._next_due: dict[str, float] = {}
         self._error_counts: dict[str, int] = {}
         self._source_locks: dict[str, asyncio.Lock] = {}
+        self._poll_semaphore = asyncio.Semaphore(max(1, settings.monitor_concurrency))
 
     def ensure_fixture(self, fixture_id: str) -> None:
         if not fixture_id:
@@ -49,9 +54,8 @@ class MonitorService:
 
     async def poll_once(self) -> None:
         await self._poll_source(zx_list_source())
-        fixtures = list(self._fixture_ids)
-        for fixture_id in fixtures:
-            await self.poll_fixture_once(fixture_id)
+        fixtures = self._poll_fixture_ids()
+        await asyncio.gather(*(self.poll_fixture_once(fixture_id) for fixture_id in fixtures))
 
     async def poll_fixture_once(
         self,
@@ -64,21 +68,24 @@ class MonitorService:
         fixture = self.db.get_fixture(fixture_id) or {}
         tmcl = fixture.get("tournament_calendar_id")
         season_year = self._season_year(fixture)
-        for source in fixture_sources(fixture_id, tournament_calendar_id=tmcl, season_year=season_year):
-            if source_names is not None and source.source not in source_names:
-                continue
-            await self._poll_source(source, force=force)
+        sources = [
+            source
+            for source in fixture_sources(fixture_id, tournament_calendar_id=tmcl, season_year=season_year)
+            if source_names is None or source.source in source_names
+        ]
+        await asyncio.gather(*(self._poll_source(source, force=force) for source in sources))
 
     async def _poll_source(self, source: SourceSpec, *, force: bool = False) -> None:
         lock = self._source_locks.setdefault(source.key, asyncio.Lock())
         async with lock:
             now = time.monotonic()
-            if self._next_due.get(source.key, 0) > now:
+            if not force and self._next_due.get(source.key, 0) > now:
                 return
             source_url = source.params.get("url")
             try:
-                payload = await self.upstream.fetch_bsapi(source.path, source.params, use_cache=False)
-                success = bool(isinstance(payload, dict) and payload.get("success") is True)
+                async with self._poll_semaphore:
+                    payload = await self.upstream.fetch_bsapi(source.path, source.params, use_cache=False)
+                success = source_payload_success(source.source, payload)
                 snapshot = self.db.record_snapshot(
                     fixture_id=source.fixture_id,
                     source=source.source,
@@ -122,9 +129,29 @@ class MonitorService:
     def _base_interval(self, source: SourceSpec) -> float:
         if source.interval_kind == "list":
             return self.settings.list_interval_seconds
+        if source.fixture_id and self._is_live_fixture(source.fixture_id):
+            return self.settings.live_interval_seconds
         if source.interval_kind == "core":
             return self.settings.core_interval_seconds
         return self.settings.aux_interval_seconds
+
+    def _poll_fixture_ids(self) -> list[str]:
+        configured = set(self.settings.configured_fixtures)
+        candidates = set(self.db.list_monitor_candidate_fixture_ids())
+        fixture_ids = (self._fixture_ids | configured | candidates) - {""}
+        return sorted(
+            (fixture_id for fixture_id in fixture_ids if fixture_id in configured or self._should_poll_fixture(fixture_id)),
+            key=lambda fixture_id: (0 if self._is_live_fixture(fixture_id) else 1, fixture_id),
+        )
+
+    def _should_poll_fixture(self, fixture_id: str) -> bool:
+        fixture = self.db.get_fixture(fixture_id) or {}
+        status = str(fixture.get("status") or "").lower()
+        return status not in FINAL_MATCH_STATUSES
+
+    def _is_live_fixture(self, fixture_id: str) -> bool:
+        fixture = self.db.get_fixture(fixture_id) or {}
+        return str(fixture.get("status") or "").lower() in LIVE_MATCH_STATUSES
 
     def _season_year(self, fixture: dict[str, Any]) -> str | None:
         local_date = fixture.get("local_date")
@@ -172,3 +199,13 @@ class MonitorService:
         if fixture_id:
             self._fixture_ids.add(fixture_id)
             self.db.upsert_fixture(fixture_id, result, source=source.source)
+
+
+def source_payload_success(source: str, payload: Any) -> bool:
+    if not (isinstance(payload, dict) and payload.get("success") is True):
+        return False
+    if source == "zx_tnsj":
+        result = payload.get("result")
+        if isinstance(result, dict) and result.get("detail"):
+            return False
+    return True

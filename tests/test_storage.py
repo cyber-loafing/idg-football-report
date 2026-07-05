@@ -36,6 +36,31 @@ def test_record_snapshot_ignores_volatile_wrapper_fields(tmp_path: Path) -> None
     assert second.changed is False
 
 
+def test_latest_snapshots_prefer_latest_successful_payload(tmp_path: Path) -> None:
+    db = Database(tmp_path / "test.sqlite3")
+    db.init()
+
+    db.record_snapshot(
+        fixture_id="fx",
+        source="zx_tnsj",
+        source_url="url",
+        payload={"success": True, "result": {"Teams": [{"TeamName": "home"}], "Players": [{"TeamName": "home"}]}},
+        success=True,
+    )
+    db.record_snapshot(
+        fixture_id="fx",
+        source="zx_tnsj",
+        source_url="url",
+        payload={"success": True, "result": {"detail": ["读取文件失败: [Errno 32] Broken pipe"]}},
+        success=False,
+    )
+
+    latest = db.latest_snapshots("fx")["zx_tnsj"]
+
+    assert latest["success"] is True
+    assert latest["payload"]["result"]["Teams"] == [{"TeamName": "home"}]
+
+
 def test_fixture_upsert_from_matchstats(tmp_path: Path) -> None:
     db = Database(tmp_path / "test.sqlite3")
     db.init()

@@ -308,7 +308,7 @@ class Database:
                 SELECT s.*
                 FROM source_snapshots s
                 JOIN (
-                    SELECT source, MAX(id) AS id
+                    SELECT source, COALESCE(MAX(CASE WHEN success = 1 THEN id END), MAX(id)) AS id
                     FROM source_snapshots
                     WHERE fixture_id = ?
                     GROUP BY source

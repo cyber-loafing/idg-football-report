@@ -7,7 +7,7 @@ import tomllib
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_FIXTURE_ID = "d4vguyrwop1mcc3d9a9ox280k"
+DEFAULT_FIXTURE_ID = "17x6hz87xt7zl404uchnd9jx0"
 PERFORM_COMPETITION_ID = "10n54vtx4fi2s1frl9ipw2t6bu"
 
 
@@ -28,7 +28,9 @@ class Settings:
     list_interval_seconds: float = 30.0
     core_interval_seconds: float = 30.0
     aux_interval_seconds: float = 30.0
+    live_interval_seconds: float = 5.0
     max_backoff_seconds: float = 300.0
+    monitor_concurrency: int = 8
     request_timeout_seconds: float = 20.0
     proxy_cache_ttl_seconds: float = 30.0
     user_agent: str = (
@@ -60,7 +62,9 @@ class Settings:
             list_interval_seconds=float(monitor.get("list_interval_seconds", 30)),
             core_interval_seconds=float(monitor.get("core_interval_seconds", 30)),
             aux_interval_seconds=float(monitor.get("aux_interval_seconds", 30)),
+            live_interval_seconds=float(monitor.get("live_interval_seconds", 5)),
             max_backoff_seconds=float(monitor.get("max_backoff_seconds", 300)),
+            monitor_concurrency=max(1, int(monitor.get("concurrency", 8))),
             proxy_cache_ttl_seconds=float(monitor.get("proxy_cache_ttl_seconds", 30)),
         )
 

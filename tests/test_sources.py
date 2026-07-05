@@ -22,6 +22,16 @@ def test_fixture_sources_include_fitness_for_mapped_fixture() -> None:
     }
 
 
+def test_fixture_sources_include_fitness_for_u17_fixtures() -> None:
+    sources = {source.source: source for source in fixture_sources("17x6hz87xt7zl404uchnd9jx0", season_year="2026")}
+
+    assert sources["zx_tnsj"].params == {
+        "year": "cfa2026",
+        "tmcl": "u17",
+        "fixtureUuid": "17x6hz87xt7zl404uchnd9jx0",
+    }
+
+
 def test_fixture_id_from_opta_url() -> None:
     url = f"https://api.performfeeds.com/soccerdata/matchplaytime/{PERFORM_COMPETITION_ID}/abc123?_fmt=json&_rt=b"
 

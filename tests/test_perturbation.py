@@ -27,6 +27,7 @@ def test_catalog_covers_visible_sections(tmp_path: Path) -> None:
     assert "lineup.pitch" in ids
     assert next(row for row in catalog if row["field_id"] == "player.passing.pass_accuracy")["perturbable"] is False
     assert next(row for row in catalog if row["field_id"] == "lineup.pitch")["perturbable"] is False
+    assert next(row for row in catalog if row["field_id"] == "fitness.team.total_distance")["perturbable"] is True
 
 
 def test_policy_save_and_apply_is_stable_and_clamped(tmp_path: Path) -> None:
@@ -141,6 +142,62 @@ def test_perturbation_policy_routes_without_admin_static_hosting(tmp_path: Path)
     policy = client.get("/api/perturbation/policy")
     assert policy.status_code == 200
     assert policy.json()["fields"]["team.passes"]["enabled"] is False
+
+
+def test_team_fitness_perturbation_reaggregates_from_players(tmp_path: Path) -> None:
+    settings = Settings(data_dir=tmp_path, db_path=tmp_path / "test.sqlite3", monitor_enabled=False)
+    service = PerturbationService(settings)
+    payload = {
+        "result": {
+            "Teams": [
+                {
+                    "TeamName": "home",
+                    "TotalDistance": 3000,
+                    "SprintingDistance": 300,
+                    "OffensiveDistance": 1200,
+                    "DefensiveDistance": 900,
+                }
+            ],
+            "Players": [
+                {"TeamName": "home", "ShirtNumber": 1, "TotalDistance": 1000, "SprintingDistance": 100},
+                {"TeamName": "home", "ShirtNumber": 2, "TotalDistance": 2000, "SprintingDistance": 200},
+            ],
+        }
+    }
+    service.save_policy(
+        {
+            "fields": {
+                field_id: {
+                    "enabled": True,
+                    "method": "percent",
+                    "min": 5,
+                    "max": 5,
+                    "rounding": "int",
+                    "clamp_min": 0,
+                    "clamp_max": None,
+                }
+                for field_id in (
+                    "fitness.team.total_distance",
+                    "fitness.team.sprint_distance",
+                    "fitness.team.offensive_distance",
+                    "fitness.team.defensive_distance",
+                )
+            }
+        }
+    )
+
+    adjusted = service.apply_source_payload(payload, "zx_tnsj", "fixture-1")
+    body = adjusted["result"]
+    players = body["Players"]
+    team = body["Teams"][0]
+
+    for field in ("TotalDistance", "SprintingDistance", "OffensiveDistance", "DefensiveDistance"):
+        assert team[field] == sum(player[field] for player in players)
+
+    assert team["TotalDistance"] == 3150
+    assert team["SprintingDistance"] == 315
+    assert team["OffensiveDistance"] == 1260
+    assert team["DefensiveDistance"] == 945
 
 
 def test_latest_core_refresh_decision_for_stale_active_fixture(tmp_path: Path) -> None:

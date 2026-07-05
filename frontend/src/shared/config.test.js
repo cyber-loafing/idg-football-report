@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildUrl, createFrontendConfig } from "./config.js";
+import { buildUrl, createFrontendConfig, resolveFixtureIdAlias } from "./config.js";
 
 test("createFrontendConfig uses same-origin defaults", () => {
   const config = createFrontendConfig({});
@@ -36,4 +36,10 @@ test("buildUrl supports absolute API origins", () => {
   const url = buildUrl("https://example.com/api", "source-config");
 
   assert.equal(url, "https://example.com/api/source-config");
+});
+
+test("resolveFixtureIdAlias maps short fixture ids", () => {
+  assert.equal(resolveFixtureIdAlias("0705chnaus"), "17x6hz87xt7zl404uchnd9jx0");
+  assert.equal(resolveFixtureIdAlias("0708CHNTAN"), "185uj7ezcc9l8g0amtlwnbl04");
+  assert.equal(resolveFixtureIdAlias("18e8rybbdmy61ww4xpb42cnx0"), "18e8rybbdmy61ww4xpb42cnx0");
 });

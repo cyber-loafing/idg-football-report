@@ -1,4 +1,9 @@
 const DEFAULT_FIXTURE_ID = "cq1wnjypozp0xc3b1z3b2hlp0";
+const FIXTURE_ID_ALIASES = {
+  "0705chnaus": "17x6hz87xt7zl404uchnd9jx0",
+  "0708chntan": "185uj7ezcc9l8g0amtlwnbl04",
+  "0711chnnga": "18e8rybbdmy61ww4xpb42cnx0",
+};
 const DEFAULT_LANGUAGE = "cn";
 const REPORT_BRAND_TITLE = "IDG FOOTBALL GROUP";
 const LANGUAGES = ["cn", "en", "es"];
@@ -132,6 +137,7 @@ const TEXT_TRANSLATIONS = {
   "成功率": { en: "Accuracy", es: "Precisión" },
   "传中": { en: "Crosses", es: "Centros" },
   "助攻": { en: "Assists", es: "Asistencias" },
+  "助攻球员": { en: "Assist", es: "Asistencia" },
   "创造机会": { en: "Chances Created", es: "Ocasiones creadas" },
   "传球成功率%": { en: "Pass Accuracy %", es: "Precisión de pase %" },
   "进攻三区传球成功率%": { en: "Final Third Pass Accuracy %", es: "Precisión en último tercio %" },
@@ -445,7 +451,7 @@ async function loadReport() {
       perform_competition_id: "10n54vtx4fi2s1frl9ipw2t6bu",
       fitness_game_infos: {},
     }));
-    const fixtureId = await resolveFixtureId();
+    const fixtureId = await resolveFixtureId(sourceConfig);
     state.fixtureId = fixtureId;
 
     const latest = await fetchJson(`/api/fixtures/${encodeURIComponent(fixtureId)}/latest`).catch(() => ({
@@ -492,16 +498,21 @@ async function loadReport() {
   }
 }
 
-async function resolveFixtureId() {
+async function resolveFixtureId(sourceConfig = {}) {
   const fromUrl = fixtureIdFromUrl();
   if (fromUrl) {
-    return fromUrl;
+    return resolveFixtureIdAlias(fromUrl);
+  }
+
+  const backendDefault = String(sourceConfig.default_fixture_id || "").trim();
+  if (backendDefault) {
+    return resolveFixtureIdAlias(backendDefault);
   }
 
   const fixtures = await fetchJson("/api/fixtures").catch(() => []);
   const configured = Array.isArray(fixtures) ? fixtures : [];
   const preferred = configured.find((fixture) => fixture.id === DEFAULT_FIXTURE_ID) || configured[0];
-  return preferred?.id || DEFAULT_FIXTURE_ID;
+  return resolveFixtureIdAlias(preferred?.id || DEFAULT_FIXTURE_ID);
 }
 
 function fixtureIdFromUrl() {
@@ -520,8 +531,31 @@ function fixtureIdFromUrl() {
     }
   }
 
-  const pathPart = window.location.pathname.replace(/^\/ui\/?/, "").split("/")[0];
-  return pathPart && pathPart !== "assets" ? pathPart.trim() : "";
+  return fixtureIdFromPath(window.location.pathname);
+}
+
+function resolveFixtureIdAlias(value) {
+  const fixtureId = String(value || "").trim();
+  if (!fixtureId) {
+    return "";
+  }
+  return FIXTURE_ID_ALIASES[fixtureId.toLowerCase()] || fixtureId;
+}
+
+function fixtureIdFromPath(pathname) {
+  const path = decodePathname(pathname);
+  const segments = path.split("/").filter(Boolean);
+  const uiIndex = segments.lastIndexOf("ui");
+  const candidate = uiIndex >= 0 ? segments[uiIndex + 1] : "";
+  return candidate && candidate !== "assets" ? candidate.trim() : "";
+}
+
+function decodePathname(pathname) {
+  try {
+    return decodeURIComponent(pathname || "");
+  } catch {
+    return pathname || "";
+  }
 }
 
 async function fetchMatchstats(fixtureId, sourceConfig) {
@@ -1094,7 +1128,8 @@ function renderEventTitlePart(part, model) {
 function eventSubtitle(event, model) {
   const team = teamBySide(event.side, model);
   const teamName = team ? teamDisplayName(team) : tx(event.subtitle || "--");
-  return `${teamName}${event.penalty ? ` / ${tx("点球")}` : ""}`;
+  const assist = event.assist ? ` / ${tx("助攻球员")}: ${event.assist}` : "";
+  return `${teamName}${event.penalty ? ` / ${tx("点球")}` : ""}${assist}`;
 }
 
 function renderPitch(model) {
@@ -1929,6 +1964,7 @@ function normalizeGoals(liveData, home, away) {
       side: teamSide,
       minute: minuteOf(goal),
       player: playerName(goal),
+      assist: assistPlayerName(goal),
       ownGoal: Boolean(goal.ownGoal || goal.type === "own goal"),
       penalty: Boolean(goal.penalty || goal.type === "penalty"),
       raw: goal,
@@ -1943,6 +1979,7 @@ function normalizeEvents(liveData, goals, home, away) {
     title: `${goal.player || "未知球员"} ${goal.ownGoal ? "乌龙球" : "进球"}`,
     side: goal.side,
     penalty: goal.penalty,
+    assist: goal.assist,
     titleParts: [
       { kind: "player", name: goal.player || "未知球员", side: goal.side },
       { kind: "text", text: goal.ownGoal ? "乌龙球" : "进球" },
@@ -2759,6 +2796,18 @@ function arrayOf(value) {
 
 function playerName(row) {
   return row.playerName || row.scorerName || row.matchName || row.name || row.player?.matchName || row.player?.name || "";
+}
+
+function assistPlayerName(row) {
+  const direct = valueFrom(row, ["assistPlayerName", "assistName", "goalAssistName", "assistPlayerMatchName"]);
+  if (direct) {
+    return direct;
+  }
+  const assistPlayer = row.assistPlayer;
+  if (typeof assistPlayer === "string") {
+    return assistPlayer;
+  }
+  return assistPlayer?.matchName || assistPlayer?.name || "";
 }
 
 function minuteOf(row) {

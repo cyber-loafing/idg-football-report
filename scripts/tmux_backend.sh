@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SESSION_NAME="${TMUX_SESSION_NAME:-cfa-monitor}"
 VENV_BIN="$ROOT_DIR/.venv/bin"
-START_CMD="cd '$ROOT_DIR' && '$VENV_BIN/cfa-mirror-site' && exec '$VENV_BIN/cfa-monitor'"
+START_CMD="cd '$ROOT_DIR' && unset ALL_PROXY all_proxy HTTP_PROXY http_proxy HTTPS_PROXY https_proxy && '$VENV_BIN/cfa-mirror-site' && exec '$VENV_BIN/cfa-monitor'"
 
 usage() {
   cat <<'EOF'

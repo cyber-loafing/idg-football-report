@@ -18,6 +18,7 @@ COUNT_RANGE: RangeSpec = {"method": "delta", "min": -2, "max": 2, "rounding": "i
 BIG_COUNT_RANGE: RangeSpec = {"method": "percent", "min": -5, "max": 5, "rounding": "int", "clamp_min": 0, "clamp_max": None}
 SMALL_DECIMAL_RANGE: RangeSpec = {"method": "delta", "min": -0.2, "max": 0.2, "rounding": "decimal2", "clamp_min": 0, "clamp_max": None}
 DISTANCE_RANGE: RangeSpec = {"method": "percent", "min": -3, "max": 3, "rounding": "int", "clamp_min": 0, "clamp_max": None}
+TEAM_DISTANCE_RANGE: RangeSpec = {"method": "percent", "min": -5, "max": 5, "rounding": "int", "clamp_min": 0, "clamp_max": None}
 MATRIX_RANGE: RangeSpec = {"method": "delta", "min": -2, "max": 2, "rounding": "int", "clamp_min": 0, "clamp_max": None}
 PERCENT_RANGE: RangeSpec = {"method": "delta", "min": -5, "max": 5, "rounding": "decimal1", "clamp_min": 0, "clamp_max": 100}
 
@@ -264,10 +265,10 @@ def build_catalog() -> list[FieldDefinition]:
     ]
 
     fitness = [
-        locked("fitness.team.total_distance", "球队总跑动", "体能数据", "sum(Players.TotalDistance)", "由球员总跑动自动汇总"),
-        locked("fitness.team.sprint_distance", "球队冲刺距离", "体能数据", "sum(Players.SprintingDistance)", "由球员冲刺距离自动汇总"),
-        locked("fitness.team.offensive_distance", "球队进攻跑动", "体能数据", "sum(Players.OffensiveDistance)", "由球员进攻跑动自动汇总"),
-        locked("fitness.team.defensive_distance", "球队防守跑动", "体能数据", "sum(Players.DefensiveDistance)", "由球员防守跑动自动汇总"),
+        FieldDefinition("fitness.team.total_distance", "球队总跑动", "体能数据", "sum(Players.TotalDistance)", "distance", True, TEAM_DISTANCE_RANGE, "整数米，最小值 0", "按球员总跑动扰动后自动汇总，保证球队值等于球员合计", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("TotalDistance",)},)),
+        FieldDefinition("fitness.team.sprint_distance", "球队冲刺距离", "体能数据", "sum(Players.SprintingDistance)", "distance", True, TEAM_DISTANCE_RANGE, "整数米，最小值 0", "按球员冲刺距离扰动后自动汇总，保证球队值等于球员合计", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("SprintingDistance",)},)),
+        FieldDefinition("fitness.team.offensive_distance", "球队进攻跑动", "体能数据", "sum(Players.OffensiveDistance)", "distance", True, TEAM_DISTANCE_RANGE, "整数米，最小值 0", "按球员总跑动占比分摊并扰动后自动汇总", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("OffensiveDistance",)},)),
+        FieldDefinition("fitness.team.defensive_distance", "球队防守跑动", "体能数据", "sum(Players.DefensiveDistance)", "distance", True, TEAM_DISTANCE_RANGE, "整数米，最小值 0", "按球员总跑动占比分摊并扰动后自动汇总", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("DefensiveDistance",)},)),
         FieldDefinition("fitness.player.total_distance", "球员总跑动", "体能数据", "zx_tnsj:Players.TotalDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "姓名、号码、球队不扰动", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("TotalDistance",)},)),
         FieldDefinition("fitness.player.sprint_distance", "球员冲刺距离", "体能数据", "zx_tnsj:Players.SprintingDistance", "distance", True, DISTANCE_RANGE, "整数米，最小值 0", "姓名、号码、球队不扰动", ({"source": "zx_tnsj", "kind": "fitness", "scope": "player", "keys": ("SprintingDistance",)},)),
     ]
@@ -610,6 +611,7 @@ class PerturbationService:
         body = self._payload_body(payload)
         if not isinstance(body, dict):
             return
+        self._ensure_player_fitness_fields(body, rules)
         for scope, collection in (("team", body.get("Teams") or body.get("teams") or []), ("player", body.get("Players") or body.get("players") or [])):
             for index, row in enumerate(collection):
                 if not isinstance(row, dict):
@@ -622,6 +624,51 @@ class PerturbationService:
                     field, rule = rule_info
                     row[key] = self._perturb_value(value, rule, f"{fixture_id}:zx_tnsj:{field.field_id}:{scope}:{context}:{key}")
         self._aggregate_team_fitness(body)
+
+    def _ensure_player_fitness_fields(
+        self,
+        body: dict[str, Any],
+        rules: dict[tuple[str, str, str], tuple[FieldDefinition, dict[str, Any]]],
+    ) -> None:
+        team_rows = body.get("Teams") or body.get("teams") or []
+        player_rows = body.get("Players") or body.get("players") or []
+        if not isinstance(team_rows, list) or not isinstance(player_rows, list):
+            return
+
+        needed_fields = [
+            field
+            for field in ("TotalDistance", "SprintingDistance", "OffensiveDistance", "DefensiveDistance")
+            if rules.get(("fitness", "player", field))
+        ]
+        if not needed_fields:
+            return
+
+        team_name_keys = ("TeamName", "teamName", "Name", "name", "ClubName")
+        player_team_keys = ("TeamName", "teamName", "ClubName", "team")
+        players_by_team: dict[str, list[dict[str, Any]]] = {}
+        for row in player_rows:
+            if not isinstance(row, dict):
+                continue
+            team_name = next((str(row.get(key) or "").strip() for key in player_team_keys if row.get(key)), "")
+            if team_name:
+                players_by_team.setdefault(team_name, []).append(row)
+
+        for team_row in team_rows:
+            if not isinstance(team_row, dict):
+                continue
+            team_name = next((str(team_row.get(key) or "").strip() for key in team_name_keys if team_row.get(key)), "")
+            team_players = players_by_team.get(team_name, [])
+            if not team_name or not team_players:
+                continue
+            for field in needed_fields:
+                if any(_numeric(_dict_get_case_insensitive(player, field)) is not None for player in team_players):
+                    continue
+                team_total = _numeric(_dict_get_case_insensitive(team_row, field))
+                if team_total is None:
+                    continue
+                distributed = _distribute_total(team_total, team_players)
+                for player, value in zip(team_players, distributed, strict=False):
+                    player[field] = value
 
     def _aggregate_team_fitness(self, body: dict[str, Any]) -> None:
         team_rows = body.get("Teams") or body.get("teams") or []
@@ -637,18 +684,18 @@ class PerturbationService:
         )
         team_name_keys = ("TeamName", "teamName", "Name", "name", "ClubName")
         player_team_keys = ("TeamName", "teamName", "ClubName", "team")
-        totals: dict[str, dict[str, float]] = {}
+        totals: dict[str, dict[str, float | None]] = {}
         for row in player_rows:
             if not isinstance(row, dict):
                 continue
             team_name = next((str(row.get(key) or "").strip() for key in player_team_keys if row.get(key)), "")
             if not team_name:
                 continue
-            bucket = totals.setdefault(team_name, {field: 0.0 for field in fields})
+            bucket = totals.setdefault(team_name, {field: None for field in fields})
             for field in fields:
                 value = _numeric(_dict_get_case_insensitive(row, field))
                 if value is not None:
-                    bucket[field] += value
+                    bucket[field] = (bucket[field] or 0.0) + value
 
         for row in team_rows:
             if not isinstance(row, dict):
@@ -657,9 +704,11 @@ class PerturbationService:
             if not team_name or team_name not in totals:
                 continue
             for field in fields:
+                if totals[team_name][field] is None:
+                    continue
                 actual_key = _dict_find_key_case_insensitive(row, field)
                 if actual_key is not None:
-                    row[actual_key] = _format_like(row[actual_key], totals[team_name][field], "int")
+                    row[actual_key] = _format_like(row[actual_key], float(totals[team_name][field] or 0), "int")
 
     def _perturb_value(self, original: Any, rule: dict[str, Any], seed: str) -> Any:
         number = _numeric(original)
@@ -734,6 +783,30 @@ def _format_like(original: Any, value: float, rounding: str) -> Any:
     if isinstance(original, int) and not isinstance(original, bool):
         return int(round(float(rounded)))
     return rounded
+
+
+def _distribute_total(total: float, rows: list[dict[str, Any]]) -> list[int]:
+    if not rows:
+        return []
+
+    rounded_total = max(0, int(round(total)))
+    weights = [_numeric(_dict_get_case_insensitive(row, "TotalDistance")) for row in rows]
+    numeric_weights = [max(0.0, weight or 0.0) for weight in weights]
+    weight_sum = sum(numeric_weights)
+    if weight_sum <= 0:
+        numeric_weights = [1.0 for _ in rows]
+        weight_sum = float(len(rows))
+
+    exact_values = [(rounded_total * weight / weight_sum) for weight in numeric_weights]
+    distributed = [int(math.floor(value)) for value in exact_values]
+    remainder = rounded_total - sum(distributed)
+    if remainder <= 0:
+        return distributed
+
+    order = sorted(range(len(rows)), key=lambda index: exact_values[index] - distributed[index], reverse=True)
+    for index in order[:remainder]:
+        distributed[index] += 1
+    return distributed
 
 
 def _dict_find_key_case_insensitive(row: dict[str, Any], expected: str) -> str | None:

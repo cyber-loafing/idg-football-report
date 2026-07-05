@@ -1,4 +1,5 @@
-import { DEFAULT_FIXTURE_ID, apiUrl, bsApiUrl } from "../shared/config.js";
+import { faArrowDown, faArrowUp, faFutbol, faSquare, faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { DEFAULT_FIXTURE_ID, PUBLIC_BASE_URL, apiUrl, bsApiUrl, resolveFixtureIdAlias } from "../shared/config.js";
 import "./report.css";
 
 const DEFAULT_LANGUAGE = "cn";
@@ -79,6 +80,8 @@ const TEXT_TRANSLATIONS = {
   "加载失败": { en: "Load failed", es: "Error de carga" },
   "数据加载失败": { en: "Data load failed", es: "Error al cargar datos" },
   "等待数据": { en: "Waiting for data", es: "Esperando datos" },
+  "距开赛": { en: "Kickoff in", es: "Inicio en" },
+  "即将开赛": { en: "Kickoff soon", es: "Comienza pronto" },
   "主队": { en: "Home", es: "Local" },
   "客队": { en: "Away", es: "Visitante" },
   "常规赛": { en: "Regular Stage", es: "Fase regular" },
@@ -134,6 +137,7 @@ const TEXT_TRANSLATIONS = {
   "成功率": { en: "Accuracy", es: "Precisión" },
   "传中": { en: "Crosses", es: "Centros" },
   "助攻": { en: "Assists", es: "Asistencias" },
+  "助攻球员": { en: "Assist", es: "Asistencia" },
   "创造机会": { en: "Chances Created", es: "Ocasiones creadas" },
   "传球成功率%": { en: "Pass Accuracy %", es: "Precisión de pase %" },
   "进攻三区传球成功率%": { en: "Final Third Pass Accuracy %", es: "Precisión en último tercio %" },
@@ -238,6 +242,15 @@ const TEAM_PALETTES = {
   },
 };
 
+const EVENT_ICON_CONFIG = {
+  goal: { icon: faFutbol, label: "进球" },
+  "penalty-goal": { icon: faFutbol, label: "点球", badgeText: "P" },
+  "own-goal": { icon: faFutbol, label: "乌龙球", badgeIcon: faTriangleExclamation },
+  "yellow-card": { icon: faSquare, label: "黄牌" },
+  "red-card": { icon: faSquare, label: "红牌" },
+  substitution: { label: "换人", substitution: true },
+};
+
 const tabs = [{ id: "match", label: "比赛数据" }];
 
 const matchSubTabs = [
@@ -263,6 +276,7 @@ const state = {
   syncReady: false,
   syncTime: null,
   reloadTimer: 0,
+  countdownTimer: 0,
 };
 
 const refs = {
@@ -496,18 +510,18 @@ async function loadReport() {
 async function resolveFixtureId(sourceConfig = {}) {
   const fromUrl = fixtureIdFromUrl();
   if (fromUrl) {
-    return fromUrl;
+    return resolveFixtureIdAlias(fromUrl);
   }
 
   const backendDefault = String(sourceConfig.default_fixture_id || "").trim();
   if (backendDefault) {
-    return backendDefault;
+    return resolveFixtureIdAlias(backendDefault);
   }
 
   const fixtures = await fetchJson(apiUrl("/fixtures")).catch(() => []);
   const configured = Array.isArray(fixtures) ? fixtures : [];
   const preferred = configured.find((fixture) => fixture.id === DEFAULT_FIXTURE_ID) || configured[0];
-  return preferred?.id || DEFAULT_FIXTURE_ID;
+  return resolveFixtureIdAlias(preferred?.id || DEFAULT_FIXTURE_ID);
 }
 
 function fixtureIdFromUrl() {
@@ -526,8 +540,42 @@ function fixtureIdFromUrl() {
     }
   }
 
-  const pathPart = window.location.pathname.replace(/^\/ui\/?/, "").split("/")[0];
-  return pathPart && pathPart !== "assets" ? pathPart.trim() : "";
+  return fixtureIdFromPath(window.location.pathname);
+}
+
+function fixtureIdFromPath(pathname) {
+  const path = decodePathname(pathname);
+  const basePaths = [basePath(PUBLIC_BASE_URL), "/ui/"].filter(Boolean);
+  for (const base of basePaths) {
+    if (path.startsWith(base)) {
+      const candidate = path.slice(base.length).split("/")[0];
+      if (candidate && candidate !== "assets") {
+        return candidate.trim();
+      }
+    }
+  }
+  const segments = path.split("/").filter(Boolean);
+  const uiIndex = segments.lastIndexOf("ui");
+  const candidate = uiIndex >= 0 ? segments[uiIndex + 1] : "";
+  return candidate && candidate !== "assets" ? candidate.trim() : "";
+}
+
+function basePath(value) {
+  try {
+    const path = new URL(value, window.location.origin).pathname;
+    return path.endsWith("/") ? path : `${path}/`;
+  } catch {
+    const path = `/${String(value || "").replace(/^\/+|\/+$/g, "")}/`;
+    return path === "//" ? "/" : path;
+  }
+}
+
+function decodePathname(pathname) {
+  try {
+    return decodeURIComponent(pathname || "");
+  } catch {
+    return pathname || "";
+  }
 }
 
 async function fetchMatchstats(fixtureId, sourceConfig) {
@@ -601,7 +649,8 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
   }
   const fitnessModel = normalizeFitness(fitness, home, away);
   const metricStats = mergeTeamFitnessStats(teamStats, fitnessModel);
-  const metricGroups = buildMetricGroups(metricStats, score);
+  const rawStatus = liveData?.matchDetails?.matchStatus || fixture?.status;
+  const metricGroups = isScheduledStatus(rawStatus) ? [] : buildMetricGroups(metricStats, score);
   const playerTables = buildPlayerTables(players, fitnessModel.players);
   const coaches = normalizeCoaches(lineups, home, away);
 
@@ -685,7 +734,8 @@ function renderHeader(model) {
   const competition = matchInfo.competition?.name || fixture?.competition || "比赛数据";
   const stage = matchInfo.stage?.name || matchInfo.stage?.type || matchInfo.series?.name || "常规赛";
   const dateText = formatDateTime(matchInfo.localDate || fixture?.local_date, matchInfo.localTime || fixture?.local_time);
-  const status = translateStatus(model.liveData?.matchDetails?.matchStatus || fixture?.status);
+  const rawStatus = model.liveData?.matchDetails?.matchStatus || fixture?.status;
+  const status = translateStatus(rawStatus);
 
   setText(refs.matchDate, dateText || "--");
   setText(refs.matchStatus, status);
@@ -695,11 +745,38 @@ function renderHeader(model) {
   setText(refs.awayName, teamDisplayName(away));
   setText(refs.homeScore, score.home ?? "-");
   setText(refs.awayScore, score.away ?? "-");
-  setText(refs.period, tx(score.period || status));
+  renderPeriod(model, rawStatus, score.period || status);
   setText(refs.venue, tx(getVenue(matchInfo)));
   setText(refs.goalsSummary, goalsSummary(goals, home, away));
   renderFlag(refs.homeFlag, home);
   renderFlag(refs.awayFlag, away);
+}
+
+function renderPeriod(model, rawStatus, fallbackText) {
+  stopCountdown();
+  const kickoffAt = kickoffDate(model);
+  if (!isScheduledStatus(rawStatus) || !kickoffAt) {
+    setText(refs.period, tx(fallbackText));
+    return;
+  }
+
+  const update = () => {
+    const text = countdownText(kickoffAt);
+    setText(refs.period, text);
+    if (kickoffAt.getTime() <= Date.now()) {
+      stopCountdown();
+      scheduleReload();
+    }
+  };
+  update();
+  state.countdownTimer = window.setInterval(update, 1000);
+}
+
+function stopCountdown() {
+  if (state.countdownTimer) {
+    window.clearInterval(state.countdownTimer);
+    state.countdownTimer = 0;
+  }
 }
 
 function renderMatchShell(model) {
@@ -818,18 +895,6 @@ function renderEventsView(model) {
 function renderLineupsView(model) {
   return `
     <div class="lineups-flow">
-      <section class="panel">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title">${escapeHtml(tx("首发阵容球场"))}</h2>
-            <p class="panel-subtitle">${escapeHtml(tx("按场上位置展示"))}</p>
-          </div>
-        </div>
-        <div class="panel-body">
-          ${renderPitch(model)}
-        </div>
-      </section>
-
       <section class="panel">
         <div class="panel-head">
           <div>
@@ -1083,9 +1148,46 @@ function renderEvent(event, model) {
 function renderEventCard(event, model) {
   return `
     <div class="event-card">
-      <strong class="event-title">${renderEventTitle(event, model)}</strong>
+      <strong class="event-title">
+        ${renderEventIcon(event)}
+        <span class="event-title-text">${renderEventTitle(event, model)}</span>
+      </strong>
       <span>${escapeHtml(eventSubtitle(event, model))}</span>
     </div>
+  `;
+}
+
+function renderEventIcon(event) {
+  const type = String(event.type || "event");
+  const config = EVENT_ICON_CONFIG[type] || { icon: faFutbol, label: "比赛事件" };
+  if (config.substitution) {
+    return `
+      <span class="event-icon event-icon-substitution" aria-label="${escapeHtml(tx(config.label))}" title="${escapeHtml(tx(config.label))}">
+        <span class="sub-arrow sub-arrow-on">${renderFontAwesomeIcon(faArrowUp)}</span>
+        <span class="sub-arrow sub-arrow-off">${renderFontAwesomeIcon(faArrowDown)}</span>
+      </span>
+    `;
+  }
+  const badge = config.badgeIcon
+    ? `<span class="event-icon-badge">${renderFontAwesomeIcon(config.badgeIcon)}</span>`
+    : config.badgeText
+      ? `<span class="event-icon-badge text">${escapeHtml(config.badgeText)}</span>`
+      : "";
+  return `
+    <span class="event-icon event-icon-${escapeHtml(type)}" aria-label="${escapeHtml(tx(config.label))}" title="${escapeHtml(tx(config.label))}">
+      ${renderFontAwesomeIcon(config.icon)}
+      ${badge}
+    </span>
+  `;
+}
+
+function renderFontAwesomeIcon(iconDefinition) {
+  const [width, height, , , pathData] = iconDefinition.icon;
+  const paths = Array.isArray(pathData) ? pathData : [pathData];
+  return `
+    <svg viewBox="0 0 ${width} ${height}" focusable="false" aria-hidden="true">
+      ${paths.map((path) => `<path fill="currentColor" d="${escapeHtml(path)}"></path>`).join("")}
+    </svg>
   `;
 }
 
@@ -1110,7 +1212,8 @@ function renderEventTitlePart(part, model) {
 function eventSubtitle(event, model) {
   const team = teamBySide(event.side, model);
   const teamName = team ? teamDisplayName(team) : tx(event.subtitle || "--");
-  return `${teamName}${event.penalty ? ` / ${tx("点球")}` : ""}`;
+  const assist = event.assist ? ` / ${tx("助攻球员")}: ${event.assist}` : "";
+  return `${teamName}${event.penalty ? ` / ${tx("点球")}` : ""}${assist}`;
 }
 
 function renderPitch(model) {
@@ -1945,6 +2048,7 @@ function normalizeGoals(liveData, home, away) {
       side: teamSide,
       minute: minuteOf(goal),
       player: playerName(goal),
+      assist: assistPlayerName(goal),
       ownGoal: Boolean(goal.ownGoal || goal.type === "own goal"),
       penalty: Boolean(goal.penalty || goal.type === "penalty"),
       raw: goal,
@@ -1954,11 +2058,13 @@ function normalizeGoals(liveData, home, away) {
 
 function normalizeEvents(liveData, goals, home, away) {
   const goalEvents = goals.map((goal) => ({
+    type: goal.ownGoal ? "own-goal" : goal.penalty ? "penalty-goal" : "goal",
     minute: goal.minute,
     minuteLabel: formatMinute(goal.minute),
     title: `${goal.player || "未知球员"} ${goal.ownGoal ? "乌龙球" : "进球"}`,
     side: goal.side,
     penalty: goal.penalty,
+    assist: goal.assist,
     titleParts: [
       { kind: "player", name: goal.player || "未知球员", side: goal.side },
       { kind: "text", text: goal.ownGoal ? "乌龙球" : "进球" },
@@ -1970,6 +2076,7 @@ function normalizeEvents(liveData, goals, home, away) {
     const side = sideForTeam(card.contestantId || card.teamId || card.contestantName || card.teamName, home, away);
     const cardType = String(card.cardType || card.type || "").toLowerCase().includes("red") ? "红牌" : "黄牌";
     return {
+      type: cardType === "红牌" ? "red-card" : "yellow-card",
       minute: minuteOf(card),
       minuteLabel: formatMinute(minuteOf(card)),
       title: `${playerName(card) || "未知球员"} ${cardType}`,
@@ -1987,6 +2094,7 @@ function normalizeEvents(liveData, goals, home, away) {
     const on = sub.playerOnName || sub.playerOn || sub.playerName || sub.subOn || "未知球员";
     const off = sub.playerOffName || sub.playerOff || sub.subOff || "";
     return {
+      type: "substitution",
       minute: minuteOf(sub),
       minuteLabel: formatMinute(minuteOf(sub)),
       title: off ? `${on} 换下 ${off}` : `${on} 换人`,
@@ -2234,8 +2342,11 @@ function buildMetricGroups(teamStats, score) {
 function buildMetricGroupRow(definition, teamStats) {
   const homeValue = definition.home ?? metricRawValue(teamStats.home, definition);
   const awayValue = definition.away ?? metricRawValue(teamStats.away, definition);
-  const homeRaw = hasMetricValue(homeValue) ? homeValue : definition.defaultValue;
-  const awayRaw = hasMetricValue(awayValue) ? awayValue : definition.defaultValue;
+  const shouldUseZeroDefault = missingMetricDefaultsToZero(definition);
+  const homeDefault = definition.defaultValue ?? (shouldUseZeroDefault && hasMetricValue(awayValue) ? 0 : undefined);
+  const awayDefault = definition.defaultValue ?? (shouldUseZeroDefault && hasMetricValue(homeValue) ? 0 : undefined);
+  const homeRaw = hasMetricValue(homeValue) ? homeValue : homeDefault;
+  const awayRaw = hasMetricValue(awayValue) ? awayValue : awayDefault;
   if (!hasMetricValue(homeRaw) && !hasMetricValue(awayRaw)) {
     return null;
   }
@@ -2260,13 +2371,27 @@ function metricRawValue(stats, definition) {
   if (definition.ratio) {
     const made = pickStat(stats, definition.ratio.made);
     const total = definition.ratio.totalSum ? sumStats(stats, definition.ratio.totalSum) : pickStat(stats, definition.ratio.total);
-    if (!hasMetricValue(made) || !hasMetricValue(total)) {
+    if (!hasMetricValue(total)) {
       return null;
     }
-    const value = ratio(made, total);
+    const value = ratio(hasMetricValue(made) ? made : 0, total);
     return value === null ? null : value * 100;
   }
   return pickStat(stats, definition.keys || []);
+}
+
+function missingMetricDefaultsToZero(definition) {
+  if (definition.ratio || definition.sum) {
+    return false;
+  }
+  if (definition.suffix === "%" || String(definition.label || "").includes("率")) {
+    return false;
+  }
+  const keys = definition.keys || [];
+  if (keys.some((key) => String(key).startsWith("fitness"))) {
+    return false;
+  }
+  return true;
 }
 
 function sumStats(stats, keyGroups) {
@@ -2772,14 +2897,19 @@ function statsMap(stats) {
       return;
     }
     const key = stat.type || stat.name || stat.key || stat.id || stat.statType;
-    const value = stat.value ?? stat.total ?? stat.amount ?? stat.val ?? stat["@value"];
-    if (!key) {
+    const value = firstMetricValue(stat.value, stat.total, stat.amount, stat.val, stat["@value"]);
+    if (!hasMetricValue(key)) {
       return;
     }
     result[String(key)] = value;
     result[normalizeKey(key)] = value;
   });
   return result;
+}
+
+function firstMetricValue(...values) {
+  const value = values.find(hasMetricValue);
+  return value === undefined ? null : value;
 }
 
 function mergeStats(primary, secondary) {
@@ -2791,11 +2921,11 @@ function pickStat(map, keys) {
     return null;
   }
   for (const key of keys) {
-    if (map[key] !== undefined && map[key] !== null) {
+    if (hasMetricValue(map[key])) {
       return map[key];
     }
     const normalized = normalizeKey(key);
-    if (map[normalized] !== undefined && map[normalized] !== null) {
+    if (hasMetricValue(map[normalized])) {
       return map[normalized];
     }
   }
@@ -2835,6 +2965,18 @@ function arrayOf(value) {
 
 function playerName(row) {
   return row.playerName || row.scorerName || row.matchName || row.name || row.player?.matchName || row.player?.name || "";
+}
+
+function assistPlayerName(row) {
+  const direct = valueFrom(row, ["assistPlayerName", "assistName", "goalAssistName", "assistPlayerMatchName"]);
+  if (direct) {
+    return direct;
+  }
+  const assistPlayer = row.assistPlayer;
+  if (typeof assistPlayer === "string") {
+    return assistPlayer;
+  }
+  return assistPlayer?.matchName || assistPlayer?.name || "";
 }
 
 function minuteOf(row) {
@@ -2947,6 +3089,53 @@ function formatDateTime(date, time) {
     return "";
   }
   return [date, time ? String(time).slice(0, 5) : ""].filter(Boolean).join(" ");
+}
+
+function kickoffDate(model) {
+  const matchInfo = model?.matchInfo || {};
+  const fixture = model?.fixture || {};
+  const utcDate = String(matchInfo.date || "").replace(/Z$/, "");
+  const utcTime = String(matchInfo.time || "");
+  if (utcDate && utcTime.endsWith("Z")) {
+    const parsed = new Date(`${utcDate}T${utcTime}`);
+    if (Number.isFinite(parsed.getTime())) {
+      return parsed;
+    }
+  }
+
+  const localDate = matchInfo.localDate || fixture.local_date;
+  const localTime = matchInfo.localTime || fixture.local_time || "00:00:00";
+  if (localDate) {
+    const parsed = new Date(`${localDate}T${String(localTime).slice(0, 8)}+08:00`);
+    if (Number.isFinite(parsed.getTime())) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
+function isScheduledStatus(status) {
+  const normalized = String(status || "").toLowerCase();
+  return ["fixture", "prematch", "scheduled"].includes(normalized);
+}
+
+function countdownText(target) {
+  const remainingMs = target.getTime() - Date.now();
+  if (remainingMs <= 0) {
+    return tx("即将开赛");
+  }
+
+  const totalSeconds = Math.floor(remainingMs / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const time = days > 0 ? `${days}d ${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}` : `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
+  return `${tx("距开赛")} ${time}`;
+}
+
+function pad2(value) {
+  return String(value).padStart(2, "0");
 }
 
 function formatClock(date) {

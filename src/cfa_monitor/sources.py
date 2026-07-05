@@ -38,6 +38,9 @@ FITNESS_GAME_INFOS = {
     "bh2vvtcxqkz5ppi8ia84xn47o": "u23",
     "bhbgv3yzwv5mrszbwl5tvmo0k": "u23",
     "athcre2fq4vbaykdau8wkf0us": "nationalteam",
+    "17x6hz87xt7zl404uchnd9jx0": "u17",
+    "185uj7ezcc9l8g0amtlwnbl04": "u17",
+    "18e8rybbdmy61ww4xpb42cnx0": "u17",
 }
 
 

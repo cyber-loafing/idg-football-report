@@ -63,3 +63,33 @@ async def test_upstream_cools_down_repeated_failures(tmp_path: Path) -> None:
         await upstream.close()
 
     assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_upstream_retries_transient_fitness_detail_errors(tmp_path: Path) -> None:
+    responses = [
+        {"success": True, "result": {"detail": ["读取文件失败: [Errno 32] Broken pipe"]}},
+        {"success": True, "result": {"detail": ["读取文件失败: [Errno 32] Broken pipe"]}},
+        {"success": True, "result": {"Teams": [{"TeamName": "home"}], "Players": [{"TeamName": "home"}]}},
+    ]
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=responses.pop(0))
+
+    upstream, requests = await make_client(tmp_path, handler)
+    try:
+        first = await upstream.fetch_bsapi(
+            "/api/data/zx_tnsj",
+            {"year": "cfa2026", "tmcl": "u17", "fixtureUuid": "fixture"},
+            use_cache=True,
+        )
+        second = await upstream.fetch_bsapi(
+            "/api/data/zx_tnsj",
+            {"year": "cfa2026", "tmcl": "u17", "fixtureUuid": "fixture"},
+            use_cache=True,
+        )
+    finally:
+        await upstream.close()
+
+    assert first == second == {"success": True, "result": {"Teams": [{"TeamName": "home"}], "Players": [{"TeamName": "home"}]}}
+    assert len(requests) == 3

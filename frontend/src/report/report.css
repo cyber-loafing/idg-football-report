@@ -316,6 +316,9 @@ button {
   margin: 6px 0 0;
   color: rgba(255, 255, 255, 0.78);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .venue-card {
@@ -768,6 +771,120 @@ button {
 
 .event-card .event-title {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+}
+
+.event-icon {
+  position: relative;
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #111827;
+}
+
+.event-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.event-icon-goal,
+.event-icon-penalty-goal {
+  background: #eef6ff;
+  color: #0f172a;
+}
+
+.event-icon-own-goal {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.event-icon-yellow-card,
+.event-icon-red-card {
+  background: transparent;
+}
+
+.event-icon-yellow-card svg,
+.event-icon-red-card svg {
+  width: 16px;
+  height: 21px;
+  filter: drop-shadow(0 1px 3px rgba(17, 24, 39, 0.24));
+  transform: rotate(-8deg);
+}
+
+.event-icon-yellow-card {
+  color: #facc15;
+}
+
+.event-icon-red-card {
+  color: #dc2626;
+}
+
+.event-icon-substitution {
+  display: block;
+  background: transparent;
+}
+
+.event-icon-substitution .sub-arrow {
+  position: absolute;
+  display: inline-grid;
+  width: 12px;
+  height: 18px;
+  place-items: center;
+}
+
+.event-icon-substitution .sub-arrow svg {
+  width: 10px;
+  height: 15px;
+  filter: drop-shadow(0 1px 1px rgba(17, 24, 39, 0.16));
+}
+
+.event-icon-substitution .sub-arrow-on {
+  top: 2px;
+  left: 4px;
+  color: #16a34a;
+}
+
+.event-icon-substitution .sub-arrow-off {
+  right: 4px;
+  bottom: 2px;
+  color: #dc2626;
+}
+
+.event-icon-badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+}
+
+.event-icon-badge svg {
+  width: 8px;
+  height: 8px;
+}
+
+.event-icon-badge.text {
+  background: #0f172a;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.event-title-text {
+  display: inline-flex;
+  min-width: 0;
   align-items: center;
   flex-wrap: wrap;
   gap: 4px 6px;
