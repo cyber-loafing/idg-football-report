@@ -789,9 +789,9 @@ button {
   flex: 0 0 auto;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #d9e3ea;
-  border-radius: 50%;
-  background: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   object-fit: contain;
   vertical-align: -3px;
 }

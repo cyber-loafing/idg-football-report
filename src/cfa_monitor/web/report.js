@@ -65,6 +65,7 @@ const TEXT_TRANSLATIONS = {
   "乌龙球": { en: "Own goal", es: "Autogol" },
   "进球": { en: "Goal", es: "Gol" },
   "点球": { en: "Penalty", es: "Penalti" },
+  "罚丢点球": { en: "Missed penalty", es: "Penalti fallado" },
   "黄牌": { en: "Yellow card", es: "Tarjeta amarilla" },
   "红牌": { en: "Red card", es: "Tarjeta roja" },
   "换下": { en: "for", es: "por" },
@@ -614,7 +615,7 @@ function buildModel({ fixtureId, fixture, matchstats, expectedGoals, passmatrix,
   preferExpectedGoals(teamStats.away, expectedTeamStats.away);
   const goals = normalizeGoals(liveData, home, away);
   const score = normalizeScore(liveData, matchInfo, goals);
-  const events = normalizeEvents(liveData, goals, home, away);
+  const events = normalizeEvents(liveData, goals, home, away, expectedSource);
   const players = mergePlayerStatSources(normalizePlayers(lineups), normalizePlayers(expectedLineups));
   const fitnessModel = normalizeFitness(fitness, home, away);
   const metricStats = mergeTeamFitnessStats(teamStats, fitnessModel);
@@ -1833,6 +1834,21 @@ function expectedGoalValueFromEvent(event) {
   return Number.isFinite(number) ? number : null;
 }
 
+function eventHasQualifier(event, qualifierId) {
+  return arrayOf(event?.qualifier || event?.qualifiers).some(
+    (item) => Number(item?.qualifierId ?? item?.id ?? item?.typeId) === qualifierId,
+  );
+}
+
+function isGoalEvent(event) {
+  const typeId = Number(event?.typeId ?? event?.type);
+  if (typeId === 16) {
+    return true;
+  }
+  const type = String(event?.type || event?.eventType || event?.eventName || "").toLowerCase();
+  return type === "goal" || type.includes(" goal");
+}
+
 function normalizePlayer(player, team, subMaps = { on: new Map(), off: new Map() }, forceSubstitute = false) {
   const name = player.matchName || player.knownName || player.name || [player.firstName, player.lastName].filter(Boolean).join(" ") || "--";
   const statMap = statsMap(player.stat || player.stats);
@@ -1972,7 +1988,8 @@ function normalizeGoals(liveData, home, away) {
   });
 }
 
-function normalizeEvents(liveData, goals, home, away) {
+function normalizeEvents(liveData, goals, home, away, expectedLiveData = {}) {
+  const playerNames = buildPlayerNameLookup(liveData);
   const goalEvents = goals.map((goal) => ({
     minute: goal.minute,
     minuteLabel: formatMinute(goal.minute),
@@ -2026,7 +2043,73 @@ function normalizeEvents(liveData, goals, home, away) {
     };
   });
 
-  return [...goalEvents, ...cardEvents, ...subs].sort((a, b) => toNumber(a.minute) - toNumber(b.minute));
+  const missedPenaltyEvents = normalizeMissedPenaltyEvents(expectedLiveData, home, away, playerNames);
+
+  return [...goalEvents, ...missedPenaltyEvents, ...cardEvents, ...subs].sort((a, b) => toNumber(a.minute) - toNumber(b.minute));
+}
+
+function normalizeMissedPenaltyEvents(liveData, home, away, playerNames = new Map()) {
+  return arrayOf(liveData?.event || liveData?.events)
+    .filter((event) => eventHasQualifier(event, 9) && !isGoalEvent(event))
+    .map((event) => {
+      const side = sideForTeam(event.contestantId || event.teamId || event.contestantName || event.teamName, home, away);
+      const name = playerNames.get(event.playerId || event.id) || playerName(event) || "未知球员";
+      return {
+        type: "missed-penalty",
+        minute: minuteOf(event),
+        minuteLabel: formatMinute(minuteOf(event)),
+        title: `${name} 罚丢点球`,
+        side,
+        titleParts: [
+          { kind: "player", name, side },
+          { kind: "text", text: "罚丢点球" },
+        ],
+        subtitle: teamNameBySide(side, home, away),
+      };
+    });
+}
+
+function buildPlayerNameLookup(liveData) {
+  const names = new Map();
+  const add = (player) => {
+    const id = player?.playerId || player?.id;
+    const name = localizedPlayerName(player);
+    if (!id || !name) {
+      return;
+    }
+    const current = names.get(id);
+    if (!current || (!hasChineseText(current) && hasChineseText(name))) {
+      names.set(id, name);
+    }
+  };
+  arrayOf(liveData?.lineUp || liveData?.lineup || liveData?.lineups).forEach((lineup) => {
+    arrayOf(lineup?.player || lineup?.players).forEach(add);
+    arrayOf(lineup?.substitute || lineup?.substitutes || lineup?.bench).forEach(add);
+  });
+  arrayOf(liveData?.goal || liveData?.goals).forEach(add);
+  return names;
+}
+
+function localizedPlayerName(row) {
+  if (!row || typeof row !== "object") {
+    return "";
+  }
+  const combinedName = [row.lastName, row.firstName].filter(Boolean).join("");
+  const candidates = [
+    row.matchName,
+    row.playerName,
+    row.scorerName,
+    row.name,
+    combinedName,
+    row.knownName,
+    row.player?.matchName,
+    row.player?.name,
+  ].filter(Boolean);
+  return candidates.find(hasChineseText) || candidates[0] || "";
+}
+
+function hasChineseText(value) {
+  return /[\u4e00-\u9fa5]/.test(String(value || ""));
 }
 
 function buildMetricRows(teamStats, score) {
